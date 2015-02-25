@@ -17,11 +17,6 @@ var server = restify.createServer({
 });
 
 /**
- * Register Middleware.
- **/
-server.use(restify.CORS());
-
-/**
  * Register static resources.
  **/
 server.get(/\/*/, restify.serveStatic({
