@@ -1,0 +1,27 @@
+{
+  "name": "sf-movies-web",
+  "version": "1.0.0",
+  "description": "San Francisco Movies Web App.",
+  "main": "index.js",
+  "scripts": {
+    "lint": "jshint .",
+    "start": "node server.js"
+  },
+  "pre-commit": [
+    "lint"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bbraithwaite/sf-movies-web.git"
+  },
+  "author": "https://github.com/bbraithwaite",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bbraithwaite/sf-movies-web/issues"
+  },
+  "homepage": "https://github.com/bbraithwaite/sf-movies-web",
+  "devDependencies": {
+    "jshint": "^2.6.0",
+    "pre-commit": "^1.0.5"
+  }
+}
