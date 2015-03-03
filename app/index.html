@@ -3,7 +3,7 @@
   <head>
     <title>SF Movies | Find out where the best movies happened in San Fransisco</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-    <link rel="stylesheet" type="text/css" href="bower_components/boc-autocomplete/lib/boc.autocomplete.css">
+    <link rel="stylesheet" type="text/css" href="bower_components/boc-autocomplete/build/boc.autocomplete.min.css">
     <style type="text/css">
       html, body, #map-canvas { 
         height: 100%; 
@@ -15,12 +15,8 @@
         font-family: Arial;
       }
 
-/*      #home, #film_detail, #location_detail {
-        padding-left: 20px;
-        padding-right: 20px;
-      }*/
-
-      #home {
+      #home, #film {
+        width: 90%;
         padding-left: 20px;
         padding-right: 20px; 
         background-color: #fff;
@@ -58,281 +54,19 @@
         -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
       }
 
-/*      .autocomplete {
+            
+      .autocomplete {
         width: 300px;
-        font-size: 18px;
       }
 
       ul.autocomplete {
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
         width: 300px;
       }
-
-      .autocomplete li {
-        font-size: 13px;
-        background-color: #fff;
-        display: list-item;
-        margin: 0;
-        padding: 10px;
-        border-bottom: solid 1px #eee;
-        border-left: solid 1px #eee;
-        border-right: solid 1px #eee;
-      }
-
-      .autocomplete li span {
-        display: none;
-      }
-
-      .autocomplete li:hover {
-        background-color: #eee;
-        
-      }
-
-      .autocomplete .selected {
-        background-color: #eee;
-      }*/
+      
 
     </style>
-    <script type="text/javascript" src="bower_components/boc-autocomplete/lib/boc.autocomplete.js"></script>
+    <script type="text/javascript" src="bower_components/boc-autocomplete/build/boc.autocomplete.min.js"></script>
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAmB6mTdjeQQrC3idzFKh1Vi5mwZ_5ogqo"></script>
-    <script type="text/javascript">
-
-      // function clicked(selected) {
-
-      //   map.setCenter(sanFran);
-      //   map.setZoom(11);
-      //   markers.forEach(function(m) {
-      //     m.setMap(null);
-      //   });
-      //   markers = [];
-
-      //   mapOptions.streetViewControl = false;
-      //   mapOptions.zoomControl = true;
-      //   map.setOptions(mapOptions);
-
-      //   document.getElementById('films_results').innerHTML = '';
-      //   var regEx = /<strong>(.+)<\/strong><span>(.+),\s([0-9]+)<\/span><br>/g;
-
-      //   var match = regEx.exec(selected);
-      //   var title = match[1];
-      //   var director = match[2];
-      //   var year = match[3];
-
-      //   detailPanel(title);
-
-      //   document.getElementById('q').value = title;
-
-      //   setMoveDetail(title, director);
-
-      //   var xhr = new XMLHttpRequest();
-      //   xhr.onload = function() {
-      //     var response = this.response;
-      //     for (var i = 0; i < response.locations.length; i++) {
-      //       plotOnMap(response, response.locations[i], response.locations.length);
-      //     };
-      //   }
-      //   xhr.open("GET", "http://localhost:5000/movies/locations?title=" + encodeURIComponent(title) + '&director=' + encodeURIComponent(director));
-      //   xhr.responseType = "json";
-      //   xhr.send();
-      // }
-
-      // function autoCompleteEvent(control) {
-      //   document.getElementById('films_results').innerHTML = '';
-          
-      //   mapOptions.streetViewControl = false;
-      //   mapOptions.zoomControl = false;
-      //   map.setOptions(mapOptions);
-
-      //   lastKeyStroke = new Date();
-
-      //   setTimeout(function() {
-
-      //     var a = new Date() - lastKeyStroke;
-      //     if (a < 180) {
-      //       return;
-      //     }
-          
-      //     if (control.value && control.value.length > 1) {
-      //       var query = control.value; // TODO: think about parsing
-      //       var xhr = new XMLHttpRequest();
-      //       xhr.onload = function() {
-      //         document.getElementById('films_results').innerHTML = '';
-      //         var ul = document.createElement('ul');
-      //         //var r = this.response.results[0];
-      //         this.response.forEach(function(r) {
-      //           var li = document.createElement('li');
-      //           var text = '<strong>' + r.title + '</strong><span>' + r.director + ', ' + r.releaseYear + '</span><br><span class="locations">' + r.locations.join(', ') + '</span>';
-      //           li.innerHTML = text;
-      //           li.addEventListener('click', function() {
-      //             clicked(this.innerHTML);
-      //           });
-      //           ul.appendChild(li);
-      //         });
-      //         document.getElementById('films_results').appendChild(ul);
-      //       }
-      //       xhr.open("GET", "http://localhost:5000/movies/search?q=" + control.value);
-      //       xhr.responseType = "json";
-      //       xhr.send();
-      //     }
-
-      //   }, 200);
-      // }
-
-      // function detailPanel(response) {
-      //   var locationDiv = document.getElementById('location_detail');
-      //   if (locationDiv) {
-      //     locationDiv.style.display = 'none';
-      //   }
-
-      //   var dashboard = document.getElementById('dashboard');
-      //   if (dashboard) {
-      //     dashboard.style.display = 'none';
-      //   }
-
-      //   if (!document.getElementById('film_detail')) {
-
-      //     // Set CSS for the control interior.
-      //     var controlText = document.createElement('div');
-      //     controlText.id = 'film_detail';
-      //     controlText.innerHTML = '<h2>' + response + '</h2><br><em>Loading locations and content...</em>';
-
-      //     document.getElementById('bottom_panel').appendChild(controlText);
-
-
-      //   } else {
-
-      //     var controlText = document.getElementById('film_detail');
-      //     controlText.innerHTML = '<h2>' + response + '</h2><em>Loading locations and content...</em>';
-      //     controlText.style.display = '';
-      //   }
-      // }
-
-      // function setMoveDetail(title, director) {
-
-      //  	var xhr = new XMLHttpRequest();
-      //   xhr.onload = function() {
-      //   	var detail = this.response;
-	     //    document.getElementById('film_detail').innerHTML = '<img src="' + detail.poster + '" alt="poster" align="right" width="80" height="119" style="padding-left:5px;" />'+
-	     //           '<div id="plot" style="overflow: scroll; height:135px;margin-top:5px;">'+
-	     //           '<h2>' + detail.title + '</h2>'+
-	     //          '' + detail.release_year + '</em>, Director: '+
-	     //          '<em>' + detail.director + '</em><br><br>'+
-	     //          'Staring: ' + detail.actors + '<br><br>'+
-	     //          'Rating: ' + detail.rating + '<br><br>'+
-	     //          'Genre: ' + detail.genre + '<br><br>'+
-	     //          '<br>Plot: ' + detail.plot + '<br><br></div>';
-      //   }
-      //   xhr.open("GET", "http://localhost:5000/movies/content?title=" + encodeURIComponent(title) + '&director=' + encodeURIComponent(director));
-      //   xhr.responseType = "json";
-      //   xhr.send();
-      // }
-
-      // function plotOnMap(detail, location) {
-      //   var pos = new google.maps.LatLng(location.geo.lat, location.geo.lng);
-      //   var marker = new google.maps.Marker({
-      //     position: pos,
-      //     map: map,
-      //     animation: google.maps.Animation.DROP,
-      //     title: location.formatted_address
-      //   });
-
-      //   if (!infoShown) {
-      //     var infowindow = new google.maps.InfoWindow({
-      //       content: '<strong>Click on a marker to see more info about a location!</strong>',
-      //       maxWidth: 100
-      //     });
-      //     infowindow.open(map, marker);
-      //     setTimeout(function() {
-      //       infowindow.close();
-      //     }, 3000);
-      //     infoShown = true;
-      //   };
-
-      //   google.maps.event.addListener(marker, 'click', zoom(detail, location));
-
-      //   markers.push(marker);
-      // }
-
-      // function zoom(detail, location) {
-      //   return function() {
-      //     var pos = new google.maps.LatLng(location.geo.lat, location.geo.lng);
-      //     map.setCenter(pos);
-      //     map.setZoom(14);
-
-      //     var locationDiv = document.getElementById('location_detail');
-
-      //     if (!locationDiv) {
-      //       locationDiv = document.createElement('div');
-      //        document.getElementById('bottom_panel').appendChild(locationDiv);
-      //     }
-
-      //     locationDiv.id = 'location_detail';
-      //     locationDiv.style.display = '';
-      //     locationDiv.innerHTML = '<h2>' + location.formatted_address  + '</h2><img src="https://maps.googleapis.com/maps/api/streetview?size=120x120&location=' + location.geo.lat + ',' + location.geo.lng + '" align="right">';
-
-      //     var sateliteViewButton = document.createElement('input');
-      //     sateliteViewButton.type = 'button';
-      //     sateliteViewButton.value = 'Satelite View';
-
-      //     sateliteViewButton.addEventListener('click', function() {
-
-      //       if (this.value === 'Satelite View') {
-      //         map.setCenter(pos);
-      //         map.setZoom(20);
-      //         map.setMapTypeId(google.maps.MapTypeId.SATELLITE);
-      //         map.setTilt(45);
-      //         map.setHeading(90);
-      //         this.value = 'Back to Roadmap'
-      //       } else {
-      //         map.setZoom(14);
-      //         map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
-      //         this.value = 'Satelite View'
-      //       }
-            
-      //     });
-
-      //     locationDiv.appendChild(sateliteViewButton);
-
-      //     var streetViewButton = document.createElement('input');
-      //     streetViewButton.type = 'button';
-      //     streetViewButton.value = 'Street View';
-
-      //     streetViewButton.addEventListener('click', function() {
-      //       var panorama = map.getStreetView();
-      //       panorama.setPosition({lat: location.geo.lat, lng: location.geo.lng});
-      //       panorama.setVisible(true);
-      //     });
-
-      //     locationDiv.appendChild(streetViewButton);
-
-      //     var backToFilm = document.createElement('input');
-      //     backToFilm.type = 'button';
-      //     backToFilm.value = 'Back to Film';
-
-      //     backToFilm.addEventListener('click', function() {
-      //         map.setZoom(11);
-      //         map.setCenter(sanFran);
-      //         map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
-      //         var location_detail = document.getElementById('location_detail');
-      //         if (location_detail) {
-      //           location_detail.style.display = 'none';
-      //         }
-
-      //         var film_detail = document.getElementById('film_detail');
-      //         if (film_detail) {
-      //           film_detail.style.display = '';
-      //         }
-      //     });
-
-      //     locationDiv.appendChild(backToFilm);
-
-      //     document.getElementById('film_detail').style.display = 'none';
-      //   }
-      // }
-
-    </script>
   </head>
   <body>
     <div id="map-canvas"></div>
@@ -353,78 +87,213 @@
       <input type="search" id="query" name="query" placeholder="Enter film title...">
     </div>
 
+    <!-- film detail -->
+    <div id="film" style="display:none;overflow: scroll; height:135px;margin-top:5px;">
+      <img data-src="{{detail.poster}}" width="80" height="119" align="right" />
+      <h2>{{detail.title}}</h2>
+      <p>{{detail.releaseYear}}</em>, Director: <em>{{detail.director}}</em></p>
+      <p>Staring: {{detail.actors}}</p>
+      <p>Rating: {{detail.rating}}</p>
+      <p>Genre: {{detail.genre}}</p>
+      <p>Plot: {{detail.plot}}</p>
+    </div>
 
     <script type="text/javascript">
-      var sanFran = new google.maps.LatLng(37.7577, -122.4376);
-      var markers = [];
-      var lastKeyStroke;
-      var infoShown = false;
+     
+      // framework
+      var positions = {};
+      var views = {};
 
-      var mapOptions = {
-        center: sanFran,
-        zoom: 11,
-        mapTypeControl: false,
-        streetViewControl: false,
-        streetViewControlOptions: {
-          position: google.maps.ControlPosition.LEFT_CENTER
-        },
-        overviewMapControl: false,
-        panControl: false,
-        zoomControl: true,
-        zoomControlOptions: {
-          position: google.maps.ControlPosition.LEFT_CENTER
+      function initView(id, position) {
+        var el = document.getElementById(id);
+        return {
+          id: id,
+          container: el,
+          visible: function(value) {
+            if (value) {
+              el.style.display = '';
+            } else {
+              el.style.display = 'none';
+            }
+          },
+          position: position,
+          template: el.innerHTML,
+          setTemplate: function(templateHtml) {
+            el.innerHTML = templateHtml;
+          }
         }
-      };
-
-      function setView(id, controlDiv) {
-        var template = document.getElementById(id);
-        template.style.display = '';
-        return template;
       }
 
-      function HomeControl(id) {
-        // Set CSS for the control border.
-        return setView(id);
+      function setView(view, mapService, model) {
+        if (positions[view.position]) {
+          positions[view.position].visible(false);
+        }
+        positions[view.position] = view;
+
+        var myRegexp = /{{([a-zA-Z]+)\.([a-zA-Z]+)}}/g
+        if (model) {
+          var match = myRegexp.exec(view.template);
+          var property;
+          var placeholder;
+          var newTemplate = view.template;
+          while (match != null) {
+            placeholder = match[0];
+            property = match[2];
+            newTemplate = newTemplate.replace(placeholder, model[property]);
+            match = myRegexp.exec(view.template);
+          }
+
+          while (newTemplate.indexOf('data-src') !== -1) {
+            newTemplate = newTemplate.replace('data-src', 'src');
+          }
+
+          view.setTemplate(newTemplate);
+        }
+
+        view.visible(true);
+
+        if (!views[view.id]) {
+          views[view.id] = true;
+          mapService.addView(view.container, view.position);
+        }
       }
 
-      function SearchControl(id, map) {
+      // services
+      function MapService(mapDiv) {
+        var sanFrancisco = new google.maps.LatLng(37.7577, -122.4376);
 
-        var view = setView(id);
-        var input = document.getElementById('query');
-        new Autocomplete(input, { 
-          url: 'http://localhost:5000/movies/search', 
+        var mapOptions = {
+          center: sanFrancisco,
+          zoom: 11,
+          mapTypeControl: false,
+          streetViewControl: false,
+          streetViewControlOptions: {
+            position: google.maps.ControlPosition.LEFT_CENTER
+          },
+          overviewMapControl: false,
+          panControl: false,
+          zoomControl: true,
+          zoomControlOptions: {
+            position: google.maps.ControlPosition.LEFT_CENTER
+          }
+        };
+
+        var mapInstance = new google.maps.Map(mapDiv, mapOptions);
+        var markers = [];
+        
+        return { 
+          addView: function(control, position) {
+            mapInstance.controls[google.maps.ControlPosition[position]].push(control);
+          },
+          map : mapInstance,
+          setDefault: function() {
+            // set to default...
+          },
+          clearMarkers: function() {
+            markers.forEach(function(m) {
+              m.setMap(null);
+            });
+            markers = [];
+          },
+          plotLocation: function(lat, lng, clickHandler) {
+            var pos = new google.maps.LatLng(lat, lng);
+            var marker = new google.maps.Marker({
+              position: pos,
+              map: mapInstance,
+              animation: google.maps.Animation.DROP,
+              title: location.formatted_address
+            });
+
+            markers.push(marker);
+
+            if (clickHandler) {
+              google.maps.event.addListener(marker, 'click', clickHandler);
+            }
+          }
+        }
+      }
+
+      // controllers
+      function FilmController(mapService, item) {
+
+        var view = initView('film', 'BOTTOM_CENTER');
+        var http = new JsonHttp();
+
+        return {
+          load: function(item) {
+            var filmUrl = "/movies/content?title=" + 
+              encodeURIComponent(item.title) + 
+              '&director=' + 
+              encodeURIComponent(item.director);
+
+            http.get(filmUrl, function(err, data) {
+              setView(view, mapService, data);
+            });
+          }
+        }
+      }
+
+      function HomeController(mapService) {
+        var view = initView('home', 'BOTTOM_CENTER');
+        setView(view, mapService);
+      }
+
+      function SearchController(mapService) {
+
+        var view = (function() {
+          var init = initView('search', 'TOP_LEFT');
+          init.query = document.getElementById('query')
+          return init;
+        }());
+
+        var filmController = new FilmController(mapService);
+        var http = new JsonHttp();
+
+        new Autocomplete(view.query, { 
+          url: '/movies/search', 
           param: 'q',
           label: 'title',
           value: 'releaseYear',
-          select: function(value, label) {
-            //alert(value + ', ' + label);
+          select: function(item) {
+            
+            // film controller
+            filmController.load(item);
+
+            var locationUrl = '/movies/locations?title=' + 
+              encodeURIComponent(item.title) + 
+              '&director=' + 
+              encodeURIComponent(item.director);
+
+            var clickMarker = function(data, location) {
+              return function() {
+                
+              }
+            }
+
+            mapService.clearMarkers();
+
+            http.get(locationUrl, function(err, data) {
+              
+              for (var i = 0; i < data.locations.length; i++) {
+                var loc = data.locations[i];
+                mapService.plotLocation(loc.geo.lat, loc.geo.lng, clickMarker(data, loc));
+              }
+
+            });
+            
           }
         });
 
-        return view;
-
-        // input.addEventListener('focus', function() {
-        //   document.getElementById('films_results').innerHTML = '';
-        // });
-
-        // var resultsUI = document.createElement('div');
-        // resultsUI.id = 'films_results';
-        // resultsUI.index = 1;
-        // controlDiv.appendChild(resultsUI);
+        setView(view, mapService);
       }
 
-      function initialize() {
-        var mapDiv = document.getElementById('map-canvas');
-        map = new google.maps.Map(mapDiv, mapOptions);
-
-        var searchControl = new SearchControl('search');
-        map.controls[google.maps.ControlPosition.TOP_LEFT].push(searchControl);
-
-        var homeControl = new HomeControl('home');
-        map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(homeControl);
+      function main() {
+        var mapService = new MapService(document.getElementById('map-canvas'));
+        new SearchController(mapService);
+        new HomeController(mapService);
       }
 
-      google.maps.event.addDomListener(window, 'load', initialize);
+      google.maps.event.addDomListener(window, 'load', main);
 
     </script>
   </body>
