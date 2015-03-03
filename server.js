@@ -17,13 +17,9 @@ var server = restify.createServer({
 });
 
 /**
- * Register static resources.
+ * Register app specific routes.
  **/
-server.get(/\/*/, restify.serveStatic({
-  directory: './app/',
-  default: 'index.html'
-
-}));
+require('./application')(server);
 
 /**
  * Start listening on server.
