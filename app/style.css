@@ -1,0 +1,57 @@
+html, body, #map-canvas { 
+  height: 100%; 
+  margin: 0; 
+  padding: 0; 
+}
+
+body {
+  font-family: Arial;
+}
+
+#home, #film {
+  width: 90%;
+  padding-left: 20px;
+  padding-right: 20px; 
+  background-color: #fff;
+  border: 1px solid #ccc;
+  height: 150px; 
+}
+
+#search {
+  padding: 10px;
+}
+
+input[type=button] {
+  background: #999;
+  background-image: -webkit-linear-gradient(top, #999, #333);
+  background-image: -moz-linear-gradient(top, #999, #333);
+  background-image: -ms-linear-gradient(top, #999, #333);
+  background-image: -o-linear-gradient(top, #999, #333);
+  background-image: linear-gradient(to bottom, #999, #333);
+  -webkit-border-radius: 8;
+  -moz-border-radius: 8;
+  border-radius: 8px;
+  color: #ffffff;
+  padding: 5px;
+  text-decoration: none;
+}
+
+::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 7px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background-color: rgba(0,0,0,.5);
+  -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
+}
+
+      
+.autocomplete {
+  width: 300px;
+}
+
+ul.autocomplete {
+  width: 300px;
+}

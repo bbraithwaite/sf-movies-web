@@ -3,7 +3,6 @@
 /**
  * Module dependencies.
  */
-
 var restify = require('restify');
 var packageConfig = require('./package');
 var port = (process.env.PORT || 4000);

@@ -4,162 +4,194 @@
     <title>SF Movies | Find out where the best movies happened in San Fransisco</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" type="text/css" href="bower_components/boc-autocomplete/build/boc.autocomplete.min.css">
-    <style type="text/css">
-      html, body, #map-canvas { 
-        height: 100%; 
-        margin: 0; 
-        padding: 0; 
-      }
-
-      body {
-        font-family: Arial;
-      }
-
-      #home, #film {
-        width: 90%;
-        padding-left: 20px;
-        padding-right: 20px; 
-        background-color: #fff;
-        border: 1px solid #ccc;
-        height: 150px; 
-      }
-
-      #search {
-        padding: 10px;
-      }
-
-      input[type=button] {
-        background: #999;
-        background-image: -webkit-linear-gradient(top, #999, #333);
-        background-image: -moz-linear-gradient(top, #999, #333);
-        background-image: -ms-linear-gradient(top, #999, #333);
-        background-image: -o-linear-gradient(top, #999, #333);
-        background-image: linear-gradient(to bottom, #999, #333);
-        -webkit-border-radius: 8;
-        -moz-border-radius: 8;
-        border-radius: 8px;
-        color: #ffffff;
-        padding: 5px;
-        text-decoration: none;
-      }
-
-      ::-webkit-scrollbar {
-        -webkit-appearance: none;
-        width: 7px;
-      }
-
-      ::-webkit-scrollbar-thumb {
-        border-radius: 4px;
-        background-color: rgba(0,0,0,.5);
-        -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
-      }
-
-            
-      .autocomplete {
-        width: 300px;
-      }
-
-      ul.autocomplete {
-        width: 300px;
-      }
-      
-
-    </style>
+    <link rel="stylesheet" type="text/css" href="style.css">
     <script type="text/javascript" src="bower_components/boc-autocomplete/build/boc.autocomplete.min.js"></script>
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAmB6mTdjeQQrC3idzFKh1Vi5mwZ_5ogqo"></script>
   </head>
   <body>
     <div id="map-canvas"></div>
 
-    <!-- home template -->
-    <div id="home" style="display:none;">
-      <h2>SF Movies</h2>
-      <div>
-        See film locations for all movies filmed in San Fransisco. <strong>Click on a marker to see more information about a location.</strong>.
-      </div>
-      <div>
-        This is a sample project from <a href="http://www.bradoncode.com">Bradley Braithwaite</a>.
-      </div>
-    </div>
+    <!-- TEMPLATES -->
 
-    <!-- search template -->
-    <div id="search" style="display:none;">
-      <input type="search" id="query" name="query" placeholder="Enter film title...">
-    </div>
+      <!-- home template -->
+      <div id="home" style="display:none;">
+        <h2>SF Movies</h2>
+        <div>
+          See film locations for all movies filmed in San Fransisco. <strong>Click on a marker to see more information about a location.</strong>.
+        </div>
+        <div>
+          This is a sample project from <a href="http://www.bradoncode.com">Bradley Braithwaite</a>.
+        </div>
+      </div>
 
-    <!-- film detail -->
-    <div id="film" style="display:none;overflow: scroll; height:135px;margin-top:5px;">
-      <img data-src="{{detail.poster}}" width="80" height="119" align="right" />
-      <h2>{{detail.title}}</h2>
-      <p>{{detail.releaseYear}}</em>, Director: <em>{{detail.director}}</em></p>
-      <p>Staring: {{detail.actors}}</p>
-      <p>Rating: {{detail.rating}}</p>
-      <p>Genre: {{detail.genre}}</p>
-      <p>Plot: {{detail.plot}}</p>
-    </div>
+      <!-- search template -->
+      <div id="search" style="display:none;">
+        <input type="search" id="query" name="query" placeholder="Enter film title...">
+      </div>
+
+      <!-- film detail -->
+      <div id="film" style="display:none;overflow: scroll; height:135px;margin-top:5px;">
+        <img data-src="{{detail.poster}}" width="80" height="119" align="right" />
+        <h2>{{detail.title}}</h2>
+        <p>{{detail.releaseYear}}</em>, Director: <em>{{detail.director}}</em></p>
+        <p>Staring: {{detail.actors}}</p>
+        <p>Rating: {{detail.rating}}</p>
+        <p>Genre: {{detail.genre}}</p>
+        <p>Plot: {{detail.plot}}</p>
+      </div>
+
+    <!-- END TEMPLATES -->
 
     <script type="text/javascript">
-     
-      // framework
-      var positions = {};
-      var views = {};
 
-      function initView(id, position) {
-        var el = document.getElementById(id);
-        return {
-          id: id,
-          container: el,
-          visible: function(value) {
-            if (value) {
-              el.style.display = '';
+      // Querystring parser
+      var QS = {
+        stringify: function(args) {
+          var result = '';
+          for (var prop in args) {
+            if (result) {
+              result += '&';
             } else {
-              el.style.display = 'none';
+              result += '?';
+            }
+            result += prop + '=' + encodeURIComponent(args[prop]);
+          }
+
+          return result;
+        },
+        parse: function(qs) {
+          var result = {};
+          var match;
+          var qsRegex = /([a-z]*)=([^&]*)/g;
+          match = qsRegex.exec(qs);
+          while (match != null) {   
+            result[match[1]] = decodeURIComponent(match[2]);
+            match = qsRegex.exec(qs);
+          }
+          
+          return result;
+        }
+      }
+
+      // Framework
+      var Framework = function() {
+
+        var _ = this;
+        var controllers = {};
+        var routes = {};
+        var services = {};
+
+        function initView(id) {
+          var el = document.getElementById(id);
+          var template = (el) ? el.innerHTML : '';
+          return {
+            id: id,
+            container: el,
+            visible: function(value) {
+              if (value) {
+                el.style.display = '';
+              } else {
+                el.style.display = 'none';
+              }
+            },
+            template: template,
+            setTemplate: function(templateHtml) {
+              el.innerHTML = templateHtml;
+            },
+            setModel: function(model) {
+              var propertyRegEx = /{{([a-zA-Z]+)\.([a-zA-Z]+)}}/g
+              var match;
+              var property;
+              var placeholder;
+              var newTemplate;
+              if (model) {
+                match = propertyRegEx.exec(this.template);
+                newTemplate = this.template;
+
+                while (match != null) {
+                  placeholder = match[0];
+                  property = match[2];
+                  newTemplate = newTemplate.replace(placeholder, model[property]);
+                  match = propertyRegEx.exec(this.template);
+                }
+
+                while (newTemplate.indexOf('data-src') !== -1) {
+                  newTemplate = newTemplate.replace('data-src', 'src');
+                }
+                this.setTemplate(newTemplate);
+              }
+            }
+          }
+        }
+
+        function addRoute(route, controller) {
+          if (routes[route]) {
+            routes[route].push(controller);
+          } else {
+            routes[route] = [controller];
+          }
+        }
+
+        return {
+          addController: function(controller) {
+            var reflect = controller.toString();
+            var args = reflect.match(/.*\((.*)\)/);
+            var name = reflect.match(/function (.+)Controller/);
+            var inject = [];
+            args[1].split(',').forEach(function(key) {
+              var svc = services[key.trim()];
+              if (typeof(svc) === 'function') {
+                inject.push(new svc());
+              } else {
+                inject.push(svc);
+              }
+            });
+            var viewName = name[1].toLowerCase();
+            var instance = controller.apply(this, inject);
+            instance.view = initView(viewName);
+            if (instance.init) {
+              instance.init();
+            }
+            addRoute(instance.route, viewName);
+            controllers[name[1].toLowerCase()] = instance;
+          },
+          load: function(hash) {
+            var match = hash.match(/#(\/.*)\?(.*)/);
+            this.navigateTo('/');
+            
+            if (match) {
+              this.navigateTo(match[1], QS.parse(match[2]));
             }
           },
-          position: position,
-          template: el.innerHTML,
-          setTemplate: function(templateHtml) {
-            el.innerHTML = templateHtml;
+          navigateTo: function(url, args) {
+            var controller;
+            var view;
+
+            if (routes[url]) {
+              location.hash = url + QS.stringify(args);
+
+              routes[url].forEach(function(c) {
+                controller = controllers[c];
+                if (controller) {
+                  if (controller.render) {
+                    controller.render(args);
+                  }
+                }
+              });
+            } else {
+              // handle 404
+              console.log('404');
+            }
+          },
+          registerService: function(name, instance) {
+            services[name] = instance;
           }
         }
       }
 
-      function setView(view, mapService, model) {
-        if (positions[view.position]) {
-          positions[view.position].visible(false);
-        }
-        positions[view.position] = view;
-
-        var myRegexp = /{{([a-zA-Z]+)\.([a-zA-Z]+)}}/g
-        if (model) {
-          var match = myRegexp.exec(view.template);
-          var property;
-          var placeholder;
-          var newTemplate = view.template;
-          while (match != null) {
-            placeholder = match[0];
-            property = match[2];
-            newTemplate = newTemplate.replace(placeholder, model[property]);
-            match = myRegexp.exec(view.template);
-          }
-
-          while (newTemplate.indexOf('data-src') !== -1) {
-            newTemplate = newTemplate.replace('data-src', 'src');
-          }
-
-          view.setTemplate(newTemplate);
-        }
-
-        view.visible(true);
-
-        if (!views[view.id]) {
-          views[view.id] = true;
-          mapService.addView(view.container, view.position);
-        }
-      }
-
-      // services
-      function MapService(mapDiv) {
+      // Map Service
+      function GoogleMap(mapDiv) {
+        var markers = [];
         var sanFrancisco = new google.maps.LatLng(37.7577, -122.4376);
 
         var mapOptions = {
@@ -168,26 +200,45 @@
           mapTypeControl: false,
           streetViewControl: false,
           streetViewControlOptions: {
-            position: google.maps.ControlPosition.LEFT_CENTER
+            position: google.maps.ControlPosition.RIGHT_CENTER
           },
           overviewMapControl: false,
           panControl: false,
           zoomControl: true,
           zoomControlOptions: {
-            position: google.maps.ControlPosition.LEFT_CENTER
+            position: google.maps.ControlPosition.RIGHT_CENTER
           }
         };
 
         var mapInstance = new google.maps.Map(mapDiv, mapOptions);
-        var markers = [];
-        
+        var views = [];
+
         return { 
-          addView: function(control, position) {
-            mapInstance.controls[google.maps.ControlPosition[position]].push(control);
-          },
-          map : mapInstance,
-          setDefault: function() {
-            // set to default...
+          addView: function(view, position) {
+            // if there is already a view in this position?
+            if (views[position]) {
+              views[position].forEach(function(v) {
+                v.visible(false);
+              });
+            } else {
+              views[position] = [];
+            }
+
+            var newView = true;
+            views[position].forEach(function(v) {
+              if (v.id === view.id) {
+                newView = false;
+              }
+            });
+
+            if (newView) {
+              views[position].push(view);
+              mapInstance.controls[google.maps.ControlPosition[position]].push(view.container);
+            } else {
+              console.log(view.container);
+            }
+
+            view.visible(true);
           },
           clearMarkers: function() {
             markers.forEach(function(m) {
@@ -213,84 +264,102 @@
         }
       }
 
-      // controllers
-      function FilmController(mapService, item) {
-
-        var view = initView('film', 'BOTTOM_CENTER');
-        var http = new JsonHttp();
-
+      // App Controllers
+      function FilmController(map, http) {
         return {
-          load: function(item) {
-            var filmUrl = "/movies/content?title=" + 
-              encodeURIComponent(item.title) + 
+          route: '/film',
+          render: function(args) {
+            var filmUrl = '/movies/content?title=' + 
+              encodeURIComponent(args.title) + 
               '&director=' + 
-              encodeURIComponent(item.director);
-
+              encodeURIComponent(args.director);
+            var view = this.view;
             http.get(filmUrl, function(err, data) {
-              setView(view, mapService, data);
+              view.setModel(data);
+              map.addView(view, 'BOTTOM_CENTER');
             });
           }
         }
       }
 
-      function HomeController(mapService) {
-        var view = initView('home', 'BOTTOM_CENTER');
-        setView(view, mapService);
-      }
-
-      function SearchController(mapService) {
-
-        var view = (function() {
-          var init = initView('search', 'TOP_LEFT');
-          init.query = document.getElementById('query')
-          return init;
-        }());
-
-        var filmController = new FilmController(mapService);
-        var http = new JsonHttp();
-
-        new Autocomplete(view.query, { 
-          url: '/movies/search', 
-          param: 'q',
-          label: 'title',
-          value: 'releaseYear',
-          select: function(item) {
-            
-            // film controller
-            filmController.load(item);
-
+      function LocationsController(map, http) {
+        return {
+          route: '/film',
+          render: function(args) {
             var locationUrl = '/movies/locations?title=' + 
-              encodeURIComponent(item.title) + 
+              encodeURIComponent(args.title) + 
               '&director=' + 
-              encodeURIComponent(item.director);
+              encodeURIComponent(args.director);
 
-            var clickMarker = function(data, location) {
-              return function() {
-                
-              }
-            }
-
-            mapService.clearMarkers();
+            map.clearMarkers();
 
             http.get(locationUrl, function(err, data) {
               
-              for (var i = 0; i < data.locations.length; i++) {
-                var loc = data.locations[i];
-                mapService.plotLocation(loc.geo.lat, loc.geo.lng, clickMarker(data, loc));
-              }
+              data.locations.forEach(function(l) {
+                map.plotLocation(l.geo.lat, l.geo.lng);
+              });
 
             });
-            
           }
-        });
-
-        setView(view, mapService);
+        }
       }
 
+      function HomeController(map) {
+        return {
+          route: '/',
+          render: function() {
+            map.addView(this.view, 'BOTTOM_CENTER');
+          }
+        }
+      }
+
+      function SearchController(map, http) {
+        
+        var $ = this;
+
+        return {
+          viewModel: {
+            query: document.getElementById('query')
+          },
+          route: '/',
+          init: function() {
+            new Autocomplete(this.viewModel.query, { 
+              url: '/movies/search', 
+              param: 'q',
+              label: 'title',
+              value: 'releaseYear',
+              select: function(item) { 
+                $.navigateTo('/film', { 
+                  title: item.title, 
+                  director: item.director 
+                });
+              }
+            });
+          },
+          render: function() {
+            map.addView(this.view, 'TOP_LEFT');
+          }
+        }
+      }
+
+      // Main
       function main() {
-        var mapService = new MapService(document.getElementById('map-canvas'));
-        new SearchController(mapService);
-        new HomeController(mapService);
+
+        var mapContainer = document.getElementById('map-canvas');
+        var app = new Framework();
+
+        // Services
+        app.registerService('map', new GoogleMap(mapContainer));
+        app.registerService('http', JsonHttp);
+
+        // Controllers
+        app.addController(HomeController);
+        app.addController(SearchController);
+        app.addController(LocationsController);
+        app.addController(FilmController);
+        
+        // init routes
+        app.load(window.location.hash);
       }
 
       google.maps.event.addDomListener(window, 'load', main);
