@@ -3,66 +3,429 @@
   <head>
     <title>SF Movies | Find out where the best movies happened in San Fransisco</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-    <link rel="stylesheet" type="text/css" href="bower_components/boc-autocomplete/build/boc.autocomplete.min.css">
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <script type="text/javascript" src="bower_components/boc-autocomplete/build/boc.autocomplete.min.js"></script>
+    <style type="text/css">
+      html, body, #map-canvas { 
+        height: 100%; 
+        margin: 0; 
+        padding: 0; 
+      }
+
+      ul {
+        list-style-position: outside;
+        list-style-type: none;
+        margin: 0 10px 0 0;
+        padding: 0;
+      }
+
+      li {
+        background-color: #fff;
+        width: 100%;
+        display: list-item;
+        margin: 0;
+        padding: 10px 15px;
+        font-size: 1.4em;
+      }
+
+      li span {
+        font-size: smaller;
+        font-style: italic;
+      }
+
+      li .locations {
+        font-size: smaller;
+        color: #777;
+      }
+
+      li:hover {
+        background-color: #eee;
+        cursor: pointer;
+      }
+
+      #dashboard, #film_detail, #location_detail {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+
+      #top {
+        width: 85%;
+      }
+
+      #top img {
+        float: left;
+        margin-right: 20px;
+      }
+
+      #top input {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0 0 0;
+        font-size: 16px;
+      }
+
+      .watermark {
+        color: #666;
+      }
+
+      input[type=button] {
+        background: #999;
+        background-image: -webkit-linear-gradient(top, #999, #333);
+        background-image: -moz-linear-gradient(top, #999, #333);
+        background-image: -ms-linear-gradient(top, #999, #333);
+        background-image: -o-linear-gradient(top, #999, #333);
+        background-image: linear-gradient(to bottom, #999, #333);
+        -webkit-border-radius: 8;
+        -moz-border-radius: 8;
+        border-radius: 8px;
+        color: #ffffff;
+        padding: 5px;
+        text-decoration: none;
+      }
+
+      ::-webkit-scrollbar {
+        -webkit-appearance: none;
+        width: 7px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        border-radius: 4px;
+        background-color: rgba(0,0,0,.5);
+        -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
+      }
+    </style>
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAmB6mTdjeQQrC3idzFKh1Vi5mwZ_5ogqo"></script>
-    <script type="text/javascript" src="google-map.js"></script>
-    <script type="text/javascript" src="controllers.js"></script>
-    <script type="text/javascript" src="bower_components/boc-web-framework/build/boc.web.framework.min.js"></script>
+    <script type="text/javascript">
+      var sanFran = new google.maps.LatLng(37.7577, -122.4376);
+      var markers = [];
+      var watermark = 'Enter film title...';
+      var lastKeyStroke;
+      var infoShown = false;
+
+      var mapOptions = {
+        center: sanFran,
+        zoom: 11,
+        mapTypeControl: false,
+        streetViewControl: false,
+        streetViewControlOptions: {
+          position: google.maps.ControlPosition.LEFT_CENTER
+        },
+        overviewMapControl: false,
+        panControl: false,
+        zoomControl: true,
+        zoomControlOptions: {
+          position: google.maps.ControlPosition.LEFT_CENTER
+        }
+      };
+
+      function initialize() {
+        var mapDiv = document.getElementById('map-canvas');
+        map = new google.maps.Map(mapDiv, mapOptions);
+
+        var searchControlDiv = document.createElement('div');
+        searchControlDiv.index = 1;
+        searchControlDiv.id = 'top';
+
+        new SearchControl(searchControlDiv, map);
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(searchControlDiv);
+
+        var homeControlDiv = document.createElement('div');
+        homeControlDiv.index = 1;
+        homeControlDiv.id = 'bottom_panel';
+        homeControlDiv.style.backgroundColor = 'white';
+        homeControlDiv.style.borderStyle = 'solid';
+        homeControlDiv.style.borderColor = '#ccc';
+        homeControlDiv.style.borderWidth = '1px';
+        homeControlDiv.style.width = '100%';
+        homeControlDiv.style.height = '150px';
+        homeControlDiv.index = 1;
+
+        new HomeControl(homeControlDiv, map);
+        map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(homeControlDiv);
+      }
+
+      google.maps.event.addDomListener(window, 'load', initialize);
+
+      function SearchControl(controlDiv, map) {
+
+        var controlUI = document.createElement('input');
+        controlUI.type = 'text';
+        controlUI.name = 'q';
+        controlUI.id = 'q';
+        controlDiv.style.padding = '10px';
+        controlUI.value = watermark;
+        controlUI.className = 'watermark';
+        controlUI.autocomplete = 'off';
+
+        controlUI.addEventListener('focus', function() {
+          if (this.value === watermark) {
+            this.value = '';
+          } else {
+            autoCompleteEvent(this);
+          }
+          document.getElementById('films_results').innerHTML = '';
+        });
+
+        controlUI.addEventListener('blur', function() {
+          if (this.value === '') {
+            this.value = watermark;
+          };
+        });
+
+        controlUI.addEventListener('keyup', function() {
+          autoCompleteEvent(this);
+        });
+        
+        controlDiv.appendChild(controlUI);
+
+        var resultsUI = document.createElement('div');
+        resultsUI.id = 'films_results';
+        resultsUI.index = 1;
+        controlDiv.appendChild(resultsUI);
+      }
+
+      function clicked(selected) {
+
+        map.setCenter(sanFran);
+        map.setZoom(11);
+        markers.forEach(function(m) {
+          m.setMap(null);
+        });
+        markers = [];
+
+        mapOptions.streetViewControl = false;
+        mapOptions.zoomControl = true;
+        map.setOptions(mapOptions);
+
+        document.getElementById('films_results').innerHTML = '';
+        var regEx = /<strong>(.+)<\/strong><span>(.+),\s([0-9]+)<\/span><br>/g;
+
+        var match = regEx.exec(selected);
+        var title = match[1];
+        var director = match[2];
+        var year = match[3];
+
+        detailPanel(title);
+
+        document.getElementById('q').value = title;
+
+        setMoveDetail(title, director);
+
+        var xhr = new XMLHttpRequest();
+        xhr.onload = function() {
+          var response = this.response;
+          for (var i = 0; i < response.locations.length; i++) {
+            plotOnMap(response, response.locations[i], response.locations.length);
+          };
+        }
+        xhr.open("GET", "/movies/locations?title=" + encodeURIComponent(title) + '&director=' + encodeURIComponent(director));
+        xhr.responseType = "json";
+        xhr.send();
+      }
+
+      function autoCompleteEvent(control) {
+        document.getElementById('films_results').innerHTML = '';
+          
+        mapOptions.streetViewControl = false;
+        mapOptions.zoomControl = false;
+        map.setOptions(mapOptions);
+
+        lastKeyStroke = new Date();
+
+        setTimeout(function() {
+
+          var a = new Date() - lastKeyStroke;
+          if (a < 180) {
+            return;
+          }
+          
+          if (control.value && control.value.length > 1) {
+            var query = control.value; // TODO: think about parsing
+            var xhr = new XMLHttpRequest();
+            xhr.onload = function() {
+              document.getElementById('films_results').innerHTML = '';
+              var ul = document.createElement('ul');
+              //var r = this.response.results[0];
+              this.response.forEach(function(r) {
+                var li = document.createElement('li');
+                var text = '<strong>' + r.title + '</strong><span>' + r.director + ', ' + r.releaseYear + '</span><br><span class="locations">' + r.locations.join(', ') + '</span>';
+                li.innerHTML = text;
+                li.addEventListener('click', function() {
+                  clicked(this.innerHTML);
+                });
+                ul.appendChild(li);
+              });
+              document.getElementById('films_results').appendChild(ul);
+            }
+            xhr.open("GET", "/movies/search?q=" + control.value);
+            xhr.responseType = "json";
+            xhr.send();
+          }
+
+        }, 200);
+      }
+
+      function detailPanel(response) {
+        var locationDiv = document.getElementById('location_detail');
+        if (locationDiv) {
+          locationDiv.style.display = 'none';
+        }
+
+        var dashboard = document.getElementById('dashboard');
+        if (dashboard) {
+          dashboard.style.display = 'none';
+        }
+
+        if (!document.getElementById('film_detail')) {
+
+          // Set CSS for the control interior.
+          var controlText = document.createElement('div');
+          controlText.id = 'film_detail';
+          controlText.innerHTML = '<h2>' + response + '</h2><br><em>Loading locations and content...</em>';
+
+          document.getElementById('bottom_panel').appendChild(controlText);
+
+
+        } else {
+
+          var controlText = document.getElementById('film_detail');
+          controlText.innerHTML = '<h2>' + response + '</h2><em>Loading locations and content...</em>';
+          controlText.style.display = '';
+        }
+      }
+
+      function setMoveDetail(title, director) {
+
+        var xhr = new XMLHttpRequest();
+        xhr.onload = function() {
+          var detail = this.response;
+          document.getElementById('film_detail').innerHTML = '<img src="' + detail.poster + '" alt="poster" align="right" width="80" height="119" style="padding-left:5px;" />'+
+                 '<div id="plot" style="overflow: scroll; height:135px;margin-top:5px;">'+
+                 '<h2>' + detail.title + '</h2>'+
+                '' + detail.release_year + '</em>, Director: '+
+                '<em>' + detail.director + '</em><br><br>'+
+                'Staring: ' + detail.actors + '<br><br>'+
+                'Rating: ' + detail.rating + '<br><br>'+
+                'Genre: ' + detail.genre + '<br><br>'+
+                '<br>Plot: ' + detail.plot + '<br><br></div>';
+        }
+        xhr.open("GET", "/movies/content?title=" + encodeURIComponent(title) + '&director=' + encodeURIComponent(director));
+        xhr.responseType = "json";
+        xhr.send();
+      }
+
+      function plotOnMap(detail, location) {
+        var pos = new google.maps.LatLng(location.geo.lat, location.geo.lng);
+        var marker = new google.maps.Marker({
+          position: pos,
+          map: map,
+          animation: google.maps.Animation.DROP,
+          title: location.formatted_address
+        });
+
+        if (!infoShown) {
+          var infowindow = new google.maps.InfoWindow({
+            content: '<strong>Click on a marker to see more info about a location!</strong>',
+            maxWidth: 100
+          });
+          infowindow.open(map, marker);
+          setTimeout(function() {
+            infowindow.close();
+          }, 3000);
+          infoShown = true;
+        };
+
+        google.maps.event.addListener(marker, 'click', zoom(detail, location));
+
+        markers.push(marker);
+      }
+
+      function zoom(detail, location) {
+        return function() {
+          var pos = new google.maps.LatLng(location.geo.lat, location.geo.lng);
+          map.setCenter(pos);
+          map.setZoom(14);
+
+          var locationDiv = document.getElementById('location_detail');
+
+          if (!locationDiv) {
+            locationDiv = document.createElement('div');
+             document.getElementById('bottom_panel').appendChild(locationDiv);
+          }
+
+          locationDiv.id = 'location_detail';
+          locationDiv.style.display = '';
+          locationDiv.innerHTML = '<h2>' + location.formatted_address  + '</h2><img src="https://maps.googleapis.com/maps/api/streetview?size=120x120&location=' + location.geo.lat + ',' + location.geo.lng + '" align="right">';
+
+          var sateliteViewButton = document.createElement('input');
+          sateliteViewButton.type = 'button';
+          sateliteViewButton.value = 'Satelite View';
+
+          sateliteViewButton.addEventListener('click', function() {
+
+            if (this.value === 'Satelite View') {
+              map.setCenter(pos);
+              map.setZoom(20);
+              map.setMapTypeId(google.maps.MapTypeId.SATELLITE);
+              map.setTilt(45);
+              map.setHeading(90);
+              this.value = 'Back to Roadmap'
+            } else {
+              map.setZoom(14);
+              map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
+              this.value = 'Satelite View'
+            }
+            
+          });
+
+          locationDiv.appendChild(sateliteViewButton);
+
+          var streetViewButton = document.createElement('input');
+          streetViewButton.type = 'button';
+          streetViewButton.value = 'Street View';
+
+          streetViewButton.addEventListener('click', function() {
+            var panorama = map.getStreetView();
+            panorama.setPosition({lat: location.geo.lat, lng: location.geo.lng});
+            panorama.setVisible(true);
+          });
+
+          locationDiv.appendChild(streetViewButton);
+
+          var backToFilm = document.createElement('input');
+          backToFilm.type = 'button';
+          backToFilm.value = 'Back to Film';
+
+          backToFilm.addEventListener('click', function() {
+              map.setZoom(11);
+              map.setCenter(sanFran);
+              map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
+              var location_detail = document.getElementById('location_detail');
+              if (location_detail) {
+                location_detail.style.display = 'none';
+              }
+
+              var film_detail = document.getElementById('film_detail');
+              if (film_detail) {
+                film_detail.style.display = '';
+              }
+          });
+
+          locationDiv.appendChild(backToFilm);
+
+          document.getElementById('film_detail').style.display = 'none';
+        }
+      }
+
+      function HomeControl(controlDiv, map) {
+          // Set CSS for the control border.
+          var dashBoard = document.createElement('div');
+          dashBoard.innerHTML = '<h2>SF Movies</h2><div>See film locations for all movies filmed in San Fransisco. <strong>Click on a marker to see more information about a location.</strong>.</div><p>This is a sample project from <a href="http://www.bradoncode.com">Bradley Braithwaite</a>.</p>';
+          dashBoard.id = 'dashboard';
+
+          controlDiv.appendChild(dashBoard);
+      }
+    </script>
   </head>
   <body>
     <div id="map-canvas"></div>
-
-    <!-- home -->
-    <div id="home" style="display:none;">
-      <h2>SF Movies</h2>
-      <div>
-        See film locations for all movies filmed in San Fransisco. <strong>Click on a marker to see more information about a location.</strong>.
-      </div>
-      <div>
-        This is a sample project from <a href="http://www.bradoncode.com">Bradley Braithwaite</a>.
-      </div>
-    </div>
-
-    <!-- search -->
-    <div id="search" style="display:none;">
-      <input type="search" id="query" name="query" placeholder="Enter film title...">
-    </div>
-
-    <!-- film -->
-    <div id="film" style="display:none;overflow: scroll; height:135px;margin-top:5px;">
-      <img data-src="{{detail.poster}}" width="80" height="119" align="right" />
-      <h2>{{detail.title}}</h2>
-      <p>{{detail.releaseYear}}</em>, Director: <em>{{detail.director}}</em></p>
-      <p>Staring: {{detail.actors}}</p>
-      <p>Rating: {{detail.rating}}</p>
-      <p>Genre: {{detail.genre}}</p>
-      <p>Plot: {{detail.plot}}</p>
-    </div>
-    <script type="text/javascript">
-      // Main
-      function main() {
-
-        var mapContainer = document.getElementById('map-canvas');
-        var app = new Framework();
-
-        // Services
-        app.registerService('map', new GoogleMap(mapContainer));
-        app.registerService('http', JsonHttp);
-
-        // Controllers
-        app.addController(HomeController);
-        app.addController(SearchController);
-        app.addController(LocationsController);
-        app.addController(FilmController);
-        
-        // init routes
-        app.load(window.location.hash);
-      }
-
-      google.maps.event.addDomListener(window, 'load', main);
-
-    </script>
   </body>
 </html
