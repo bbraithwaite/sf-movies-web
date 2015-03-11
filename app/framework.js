@@ -66,7 +66,7 @@ window.Framework = function() {
       var inject = [];
       args[1].split(',').forEach(function(key) {
         var Svc = services[key.trim()];
-        if (typeof(svc) === 'function') {
+        if (typeof(Svc) === 'function') {
           inject.push(new Svc());
         } else {
           inject.push(Svc);

@@ -1,7 +1,7 @@
 'use strict';
 
 // Route /
-window.HomeController = function(map) {
+window.HomeController = function HomeController(map) {
   return {
     route: '/',
     render: function() {
@@ -10,7 +10,7 @@ window.HomeController = function(map) {
   };
 };
 
-window.SearchController = function(map) {
+window.SearchController = function SearchController(map) {
   var $ = this;
 
   return {
@@ -39,7 +39,7 @@ window.SearchController = function(map) {
 };
 
 // Route /film
-window.FilmController = function(map, http) {
+window.FilmController = function FilmController(map, http) {
   return {
     route: '/film',
     render: function(args) {
@@ -56,7 +56,7 @@ window.FilmController = function(map, http) {
   };
 };
 
-window.LocationsController = function(map, http) {
+window.LocationsController = function LocationsController(map, http) {
   return {
     route: '/film',
     render: function(args) {

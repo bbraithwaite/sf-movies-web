@@ -9,12 +9,13 @@
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAmB6mTdjeQQrC3idzFKh1Vi5mwZ_5ogqo"></script>
     <script type="text/javascript" src="qs.js"></script>
     <script type="text/javascript" src="google-map.js"></script>
+    <script type="text/javascript" src="controllers.js"></script>
     <script type="text/javascript" src="framework.js"></script>
   </head>
   <body>
     <div id="map-canvas"></div>
 
-    <!-- home template -->
+    <!-- home -->
     <div id="home" style="display:none;">
       <h2>SF Movies</h2>
       <div>
@@ -25,12 +26,12 @@
       </div>
     </div>
 
-    <!-- search template -->
+    <!-- search -->
     <div id="search" style="display:none;">
       <input type="search" id="query" name="query" placeholder="Enter film title...">
     </div>
 
-    <!-- film detail -->
+    <!-- film -->
     <div id="film" style="display:none;overflow: scroll; height:135px;margin-top:5px;">
       <img data-src="{{detail.poster}}" width="80" height="119" align="right" />
       <h2>{{detail.title}}</h2>
@@ -40,9 +41,7 @@
       <p>Genre: {{detail.genre}}</p>
       <p>Plot: {{detail.plot}}</p>
     </div>
-
     <script type="text/javascript">
-
       // Main
       function main() {
 
