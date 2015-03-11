@@ -15,6 +15,7 @@
     "tests"
   ],
   "dependencies": {
-    "boc-autocomplete": "bbraithwaite/boc-autocomplete"
+    "boc-autocomplete": "bbraithwaite/boc-autocomplete",
+    "boc-web-framework": "bbraithwaite/boc-web-framework"
   }
 }
