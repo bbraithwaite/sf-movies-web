@@ -65,7 +65,6 @@ window.GoogleMap = function(mapDiv) {
         position: pos,
         map: mapInstance,
         animation: g.maps.Animation.DROP
-        //title: location.formatted_address
       });
 
       markers.push(marker);
