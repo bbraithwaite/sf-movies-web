@@ -3,95 +3,7 @@
   <head>
     <title>SF Movies | Find out where the best movies happened in San Fransisco</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-    <style type="text/css">
-      html, body, #map-canvas { 
-        height: 100%; 
-        margin: 0; 
-        padding: 0; 
-      }
-
-      ul {
-        list-style-position: outside;
-        list-style-type: none;
-        margin: 0 10px 0 0;
-        padding: 0;
-      }
-
-      li {
-        background-color: #fff;
-        width: 100%;
-        display: list-item;
-        margin: 0;
-        padding: 10px 15px;
-        font-size: 1.4em;
-      }
-
-      li span {
-        font-size: smaller;
-        font-style: italic;
-      }
-
-      li .locations {
-        font-size: smaller;
-        color: #777;
-      }
-
-      li:hover {
-        background-color: #eee;
-        cursor: pointer;
-      }
-
-      #dashboard, #film_detail, #location_detail {
-        padding-left: 10px;
-        padding-right: 10px;
-      }
-
-      #top {
-        width: 85%;
-      }
-
-      #top img {
-        float: left;
-        margin-right: 20px;
-      }
-
-      #top input {
-        width: 100%;
-        padding: 10px;
-        margin: 10px 0 0 0;
-        font-size: 16px;
-      }
-
-      .watermark {
-        color: #666;
-      }
-
-      input[type=button] {
-        background: #999;
-        background-image: -webkit-linear-gradient(top, #999, #333);
-        background-image: -moz-linear-gradient(top, #999, #333);
-        background-image: -ms-linear-gradient(top, #999, #333);
-        background-image: -o-linear-gradient(top, #999, #333);
-        background-image: linear-gradient(to bottom, #999, #333);
-        -webkit-border-radius: 8;
-        -moz-border-radius: 8;
-        border-radius: 8px;
-        color: #ffffff;
-        padding: 5px;
-        text-decoration: none;
-      }
-
-      ::-webkit-scrollbar {
-        -webkit-appearance: none;
-        width: 7px;
-      }
-
-      ::-webkit-scrollbar-thumb {
-        border-radius: 4px;
-        background-color: rgba(0,0,0,.5);
-        -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
-      }
-    </style>
+    <link rel="stylesheet" type="text/css" href="style.css">
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAmB6mTdjeQQrC3idzFKh1Vi5mwZ_5ogqo"></script>
     <script type="text/javascript">
       /*
@@ -124,22 +36,15 @@
         map = new google.maps.Map(mapDiv, mapOptions);
 
         var searchControlDiv = document.createElement('div');
-        searchControlDiv.index = 1;
         searchControlDiv.id = 'top';
+        searchControlDiv.className = 'top';
 
         new SearchControl(searchControlDiv, map);
         map.controls[google.maps.ControlPosition.TOP_LEFT].push(searchControlDiv);
 
         var homeControlDiv = document.createElement('div');
-        homeControlDiv.index = 1;
         homeControlDiv.id = 'bottom_panel';
-        homeControlDiv.style.backgroundColor = 'white';
-        homeControlDiv.style.borderStyle = 'solid';
-        homeControlDiv.style.borderColor = '#ccc';
-        homeControlDiv.style.borderWidth = '1px';
-        homeControlDiv.style.width = '100%';
-        homeControlDiv.style.height = '150px';
-        homeControlDiv.index = 1;
+        homeControlDiv.className = 'bottom_panel';
 
         new HomeControl(homeControlDiv, map);
         map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(homeControlDiv);
@@ -153,7 +58,6 @@
         controlUI.type = 'text';
         controlUI.name = 'q';
         controlUI.id = 'q';
-        controlDiv.style.padding = '10px';
         controlUI.value = watermark;
         controlUI.className = 'watermark';
         controlUI.autocomplete = 'off';
@@ -181,7 +85,6 @@
 
         var resultsUI = document.createElement('div');
         resultsUI.id = 'films_results';
-        resultsUI.index = 1;
         controlDiv.appendChild(resultsUI);
       }
 
@@ -282,6 +185,7 @@
           // Set CSS for the control interior.
           var controlText = document.createElement('div');
           controlText.id = 'film_detail';
+          controlText.className = 'film_detail';
           controlText.innerHTML = '<h2>' + response + '</h2><br><em>Loading locations and content...</em>';
 
           document.getElementById('bottom_panel').appendChild(controlText);
@@ -357,6 +261,7 @@
           }
 
           locationDiv.id = 'location_detail';
+          locationDiv.className = 'location_detail';
           locationDiv.style.display = '';
           locationDiv.innerHTML = '<h2>' + location.location  + '</h2><img src="https://maps.googleapis.com/maps/api/streetview?size=120x120&location=' + location.geo.lat + ',' + location.geo.lng + '" align="right">';
 
@@ -425,6 +330,7 @@
           var dashBoard = document.createElement('div');
           dashBoard.innerHTML = '<h2>SF Movies</h2><div>See film locations for all movies filmed in San Fransisco. <strong>Click on a marker to see more information about a location.</strong>.</div><p>This is a sample project from <a href="http://www.bradoncode.com">Bradley Braithwaite</a>.</p>';
           dashBoard.id = 'dashboard';
+          dashBoard.className = 'dashboard';
 
           controlDiv.appendChild(dashBoard);
       }
