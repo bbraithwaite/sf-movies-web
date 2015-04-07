@@ -9,136 +9,22 @@
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAmB6mTdjeQQrC3idzFKh1Vi5mwZ_5ogqo"></script>
     <script type="text/javascript" src="google-map.js"></script>
     <script type="text/javascript" src="templates.js"></script>
+    <script type="text/javascript" src="search-control.js"></script>
+    <script type="text/javascript" src="home-control.js"></script>
   </head>
   <body>
     <div id="map-canvas"></div>
     <script type="text/javascript">
         /*
-         * NOTE: this (probably) isn't how you should be doing JavaScript!
+         * NOTE: this (probably, a little bit like) how you should be doing JavaScript!
          */
-        var map;
-
         function initialize() {
-          map = new GoogleMap(window.google, window.movieApp.templates.mapCanvas());
-          new SearchControl(window.movieApp.templates.search(), map);
-          new HomeControl(window.movieApp.templates.home(), map);
+          var map = new GoogleMap(google, movieApp.templates.mapCanvas());
+          new movieApp.SearchControl(movieApp.templates.search(), map);
+          new movieApp.HomeControl(movieApp.templates.home(), map);
         }
 
         google.maps.event.addDomListener(window, 'load', initialize);
-
-        function SearchControl(controlDiv, map) {
-          new window.Autocomplete(controlDiv.searchInput, { 
-            url: '/movies/search', 
-            param: 'q',
-            label: 'title',
-            value: 'releaseYear',
-            select: function(item) { 
-              clicked(item);
-            }
-          });
-
-          map.addView(controlDiv.container, 'TOP_LEFT');
-        }
-
-        function clicked(item) {
-          map.clearMarkers();
-          map.setOptions({ streetViewControl: false, zoomControl: true });
-    
-          detailPanel(item.title);
-          setMoveDetail(item.title, item.director);
-
-          var xhr = new XMLHttpRequest();
-          xhr.onload = function() {
-            var response = this.response;
-            for (var i = 0; i < response.locations.length; i++) {
-              map.plotLocation(
-                response.locations[i].geo.lat, 
-                response.locations[i].geo.lng, 
-                zoom(response, response.locations[i]));
-            };
-          }
-          xhr.open("GET", "/movies/locations?title=" + encodeURIComponent(item.title) + '&director=' + encodeURIComponent(item.director));
-          xhr.responseType = "json";
-          xhr.send();
-        }
-
-        function detailPanel(response) {
-          var locationDiv = document.getElementById('location_detail');
-          if (locationDiv) {
-            locationDiv.style.display = 'none';
-          }
-
-          var dashboard = document.getElementById('dashboard');
-          if (dashboard) {
-            dashboard.style.display = 'none';
-          }
-
-          if (!document.getElementById('film_detail')) {
-            var controlText = window.movieApp.templates.loading(response);
-            document.getElementById('bottom_panel').appendChild(controlText);
-          } else {
-            var controlText = window.movieApp.templates.loading(response);
-            controlText.style.display = '';
-          }
-        }
-
-        function setMoveDetail(title, director) {
-          var xhr = new XMLHttpRequest();
-          xhr.onload = function() {
-            var detail = this.response;
-            document.getElementById('film_detail').innerHTML = window.movieApp.templates.movie(detail);
-          }
-          xhr.open("GET", "/movies/content?title=" + encodeURIComponent(title) + '&director=' + encodeURIComponent(director));
-          xhr.responseType = "json";
-          xhr.send();
-        }
-
-        function zoom(detail, location) {
-          return function() {
-            map.zoomView(location.geo.lat, location.geo.lng);
-            var locationDiv = window.movieApp.templates.location(location);
-            locationDiv.container.style.display = '';
-
-            document.getElementById('bottom_panel').appendChild(locationDiv.container);
-
-            locationDiv.sateliteViewButton.addEventListener('click', function() {
-              if (this.value === 'Satelite View') {
-                map.sateliteView(location.geo.lat, location.geo.lng);
-                this.value = 'Back to Roadmap'
-              } else {
-                map.roadmapView(location.geo.lat, location.geo.lng);
-                this.value = 'Satelite View'
-              }
-            });
-
-            locationDiv.streetViewButton.addEventListener('click', function() {
-              map.streetView(location.geo.lat, location.geo.lng);
-            });
-
-            locationDiv.backToFilmButton.addEventListener('click', function() {
-                map.reset();
-                var location_detail = document.getElementById('location_detail');
-                if (location_detail) {
-                  location_detail.style.display = 'none';
-                }
-
-                var film_detail = document.getElementById('film_detail');
-                if (film_detail) {
-                  film_detail.style.display = '';
-                }
-            });
-
-            locationDiv.container.appendChild(locationDiv.sateliteViewButton);
-            locationDiv.container.appendChild(locationDiv.streetViewButton);
-            locationDiv.container.appendChild(locationDiv.backToFilmButton);
-
-            document.getElementById('film_detail').style.display = 'none';
-          }
-        }
-
-        function HomeControl(controlDiv, map) {
-          map.addView(controlDiv, 'BOTTOM_CENTER');
-        }
       </script>
     </body>
 </html
