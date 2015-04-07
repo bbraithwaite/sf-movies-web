@@ -95,7 +95,7 @@
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAmB6mTdjeQQrC3idzFKh1Vi5mwZ_5ogqo"></script>
     <script type="text/javascript">
       /*
-       * NOTE: The below is not how to do JavaScript!
+       * NOTE: this (probably) isn't how you should be doing JavaScript!
        */
       var sanFran = new google.maps.LatLng(37.7577, -122.4376);
       var markers = [];
@@ -347,6 +347,8 @@
           map.setCenter(pos);
           map.setZoom(14);
 
+          console.log(location);
+
           var locationDiv = document.getElementById('location_detail');
 
           if (!locationDiv) {
@@ -356,7 +358,7 @@
 
           locationDiv.id = 'location_detail';
           locationDiv.style.display = '';
-          locationDiv.innerHTML = '<h2>' + location.formatted_address  + '</h2><img src="https://maps.googleapis.com/maps/api/streetview?size=120x120&location=' + location.geo.lat + ',' + location.geo.lng + '" align="right">';
+          locationDiv.innerHTML = '<h2>' + location.location  + '</h2><img src="https://maps.googleapis.com/maps/api/streetview?size=120x120&location=' + location.geo.lat + ',' + location.geo.lng + '" align="right">';
 
           var sateliteViewButton = document.createElement('input');
           sateliteViewButton.type = 'button';
