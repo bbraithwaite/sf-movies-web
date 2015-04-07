@@ -49,8 +49,6 @@ window.GoogleMap = function(google, mapDiv) {
         views[position].push(view);
         mapInstance.controls[google.maps.ControlPosition[position]]
           .push(view);
-      } else {
-        console.log(view);
       }
 
       view.style.display = '';
