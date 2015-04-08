@@ -1,9 +1,6 @@
 var AppView = Backbone.View.extend({
-	el: $('#app'),
+	tagName: 'body',
 	initialize: function() {
-		var self = this;
-
-		new GoogleMap(google, document.getElementById('map_canvas'));
-		console.log($('#map_canvas').is(':visible'));
+		this.map = new GoogleMap(google, document.getElementById('map_canvas'));
 	}
 });
