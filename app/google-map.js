@@ -25,9 +25,6 @@ window.GoogleMap = function(google, mapDiv) {
   var views = [];
 
   return {
-    onload: function(element, callback) {
-      google.maps.event.addDomListener(window, 'load', callback);
-    },
     addView: function(view, position) {
       // if there is already a view in this position?
       if (views[position]) {
