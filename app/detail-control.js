@@ -5,31 +5,39 @@
   window.movieApp = window.movieApp || {};
 
   window.movieApp.DetailControl = function(map) {
-    var detailPanel = function(response) {
-      var locationDiv = document.getElementById('location_detail');
-      if (locationDiv) {
-        locationDiv.style.display = 'none';
+
+    var view;
+
+    var getView = function() {
+
+      if (!view) {
+        view = {
+          locationDiv: window.movieApp.initView('location_detail'),
+          dashboardDiv: window.movieApp.initView('dashboard'),
+          filmDetailDiv: window.movieApp.initView('film_detail')
+        };
       }
 
-      var dashboard = document.getElementById('dashboard');
-      if (dashboard) {
-        dashboard.style.display = 'none';
-      }
-      var controlText;
-      if (!document.getElementById('film_detail')) {
-        controlText = window.movieApp.templates.loading(response);
-        document.getElementById('bottom_panel').appendChild(controlText);
-      } else {
-        controlText = window.movieApp.templates.loading(response);
-        controlText.style.display = '';
-      }
+      return view;
+    };
+   
+    var detailPanel = function(response) {
+      
+      getView().locationDiv.hide();
+      getView().dashboardDiv.hide();
+   
+      // TODO: not ideal
+      var controlText = window.movieApp.templates.loading(response);
+      document.getElementById('bottom_panel').appendChild(controlText);      
+      
+      getView().filmDetailDiv.show();
     };
 
     var setMoveDetail = function(title, director) {
       var xhr = new XMLHttpRequest();
       xhr.onload = function() {
         var detail = this.response;
-        document.getElementById('film_detail').innerHTML = window.movieApp.templates.movie(detail);
+        getView().filmDetailDiv.setText(window.movieApp.templates.movie(detail));
       };
       xhr.open('GET', '/movies/content?title=' + encodeURIComponent(title) + '&director=' + encodeURIComponent(director));
       xhr.responseType = 'json';
@@ -40,7 +48,9 @@
       return function() {
         map.zoomView(location.geo.lat, location.geo.lng);
         var locationDiv = window.movieApp.templates.location(location);
-        locationDiv.container.style.display = '';
+        
+        getView().locationDiv.hide();
+        getView().filmDetailDiv.hide();
 
         document.getElementById('bottom_panel').appendChild(locationDiv.container);
 
@@ -60,22 +70,13 @@
 
         locationDiv.backToFilmButton.addEventListener('click', function() {
             map.reset();
-            var locationDetail = document.getElementById('location_detail');
-            if (locationDetail) {
-              locationDetail.style.display = 'none';
-            }
-
-            var filmDetail = document.getElementById('film_detail');
-            if (filmDetail) {
-              filmDetail.style.display = '';
-            }
+            getView().locationDiv.hide();
+            getView().filmDetailDiv.show(); 
           });
 
         locationDiv.container.appendChild(locationDiv.sateliteViewButton);
         locationDiv.container.appendChild(locationDiv.streetViewButton);
         locationDiv.container.appendChild(locationDiv.backToFilmButton);
-
-        document.getElementById('film_detail').style.display = 'none';
       };
     };
 
