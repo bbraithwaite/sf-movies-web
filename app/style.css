@@ -4,17 +4,17 @@ html, body, #map_canvas {
   padding: 0; 
 }
 
-.dashboard, .film_detail, .location_detail {
+.bottom_panel div, .film_detail div, .location_detail div {
   padding-left: 10px;
   padding-right: 10px;
 }
 
-.top {
+.top_panel {
   width: 85%;
   padding: 10px;
 }
 
-.top input {
+.top_panel input {
   padding: 10px;
   width: 100%;
   font-size: 16px;
@@ -29,17 +29,18 @@ html, body, #map_canvas {
 }
 
 input[type=button] {
-  background: #999;
-  background-image: -webkit-linear-gradient(top, #999, #333);
-  background-image: -moz-linear-gradient(top, #999, #333);
-  background-image: -ms-linear-gradient(top, #999, #333);
-  background-image: -o-linear-gradient(top, #999, #333);
-  background-image: linear-gradient(to bottom, #999, #333);
+  background: #eee;
+  background-image: -webkit-linear-gradient(top, #eee, #aaa);
+  background-image: -moz-linear-gradient(top, #eee, #aaa);
+  background-image: -ms-linear-gradient(top, #eee, #aaa);
+  background-image: -o-linear-gradient(top, #eee, #aaa);
+  background-image: linear-gradient(to bottom, #eee, #aaa);
   -webkit-border-radius: 8;
   -moz-border-radius: 8;
   border-radius: 8px;
-  color: #ffffff;
+  color: #000;
   padding: 5px;
+  margin-right: 10px;
   text-decoration: none;
 }
 

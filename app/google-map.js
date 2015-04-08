@@ -50,6 +50,9 @@ window.GoogleMap = function(google, mapDiv) {
 
       view.style.display = '';
     },
+    getView: function(position) {
+      return mapInstance.controls[google.maps.ControlPosition[position]].j[0];
+    },
     setOptions: function(opts) {
       mapInstance.setOptions(opts);
     },
