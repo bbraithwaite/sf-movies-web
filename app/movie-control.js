@@ -1,3 +1,5 @@
+'use strict';
+
 function plotLocations(item) {
   var xhr = new XMLHttpRequest();
   xhr.onload = function() {
@@ -7,10 +9,13 @@ function plotLocations(item) {
         response.locations[i].geo.lat, 
         response.locations[i].geo.lng, 
         showLocation(response, response.locations[i]));
-    };
-  }
-  xhr.open("GET", "/movies/locations?title=" + encodeURIComponent(item.title) + '&director=' + encodeURIComponent(item.director));
-  xhr.responseType = "json";
+    }
+  };
+  xhr.open('GET', '/movies/locations?title=' + 
+    encodeURIComponent(item.title) + 
+    '&director=' + 
+    encodeURIComponent(item.director));
+  xhr.responseType = 'json';
   xhr.send();
 }
 
@@ -24,11 +29,12 @@ function displayLoadingPanel(response) {
   if (dashboard) {
     dashboard.style.display = 'none';
   }
+  
+  var controlText;
 
   if (!document.getElementById('film_detail')) {
 
-    // Set CSS for the control interior.
-    var controlText = document.createElement('div');
+    controlText = document.createElement('div');
     controlText.id = 'film_detail';
     controlText.className = 'film_detail';
     controlText.innerHTML = templates.loading(response);
@@ -37,8 +43,8 @@ function displayLoadingPanel(response) {
 
   } else {
 
-    var controlText = document.getElementById('film_detail');
-    controlText.innerHTML = templates.loading(response);;
+    controlText = document.getElementById('film_detail');
+    controlText.innerHTML = templates.loading(response);
     controlText.style.display = '';
 
   }
@@ -50,9 +56,12 @@ function getMoveDetail(title, director) {
     var detail = this.response;
     
     document.getElementById('film_detail').innerHTML = templates.movie(detail);
-  }
-  xhr.open("GET", "/movies/content?title=" + encodeURIComponent(title) + '&director=' + encodeURIComponent(director));
-  xhr.responseType = "json";
+  };
+  xhr.open('GET', '/movies/content?title=' + 
+    encodeURIComponent(title) + 
+    '&director=' + 
+    encodeURIComponent(director));
+  xhr.responseType = 'json';
   xhr.send();
 }
 

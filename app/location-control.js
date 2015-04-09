@@ -1,3 +1,5 @@
+'use strict';
+
 function showLocation(detail, location) {
   return function() {
     map.zoomView(location.geo.lat, location.geo.lng);
@@ -22,10 +24,10 @@ function showLocation(detail, location) {
 
       if (this.value === 'Satelite View') {
         map.sateliteView(location.geo.lat, location.geo.lng);
-        this.value = 'Back to Roadmap'
+        this.value = 'Back to Roadmap';
       } else {
         map.roadmapView(location.geo.lat, location.geo.lng);
-        this.value = 'Satelite View'
+        this.value = 'Satelite View';
       }
       
     });
@@ -48,14 +50,14 @@ function showLocation(detail, location) {
 
     backToFilm.addEventListener('click', function() {
         map.reset();
-        var location_detail = document.getElementById('location_detail');
-        if (location_detail) {
-          location_detail.style.display = 'none';
+        var locationDetail = document.getElementById('location_detail');
+        if (locationDetail) {
+          locationDetail.style.display = 'none';
         }
 
-        var film_detail = document.getElementById('film_detail');
-        if (film_detail) {
-          film_detail.style.display = '';
+        var filmDetail = document.getElementById('film_detail');
+        if (filmDetail) {
+          filmDetail.style.display = '';
         }
     });
 

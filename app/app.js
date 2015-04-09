@@ -1,4 +1,4 @@
-var map;
+'use strict';
 
 function initialize() {
   var mapDiv = document.getElementById('map-canvas');

@@ -1,3 +1,5 @@
+'use strict';
+
 function SearchControl(controlDiv) {
   var movieClicked = function(item) {
     map.clearMarkers();
