@@ -5,49 +5,33 @@
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" type="text/css" href="style.css">
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
+    <script type="text/javascript" src="map-service.js"></script>
     <script type="text/javascript">
       /*
        * NOTE: this (probably) isn't how you should be doing JavaScript!
        */
-      var sanFran = new google.maps.LatLng(37.7577, -122.4376);
-      var markers = [];
       var watermark = 'Enter film title...';
       var lastKeyStroke;
       var infoShown = false;
-
-      var mapOptions = {
-        center: sanFran,
-        zoom: 11,
-        mapTypeControl: false,
-        streetViewControl: false,
-        streetViewControlOptions: {
-          position: google.maps.ControlPosition.LEFT_CENTER
-        },
-        overviewMapControl: false,
-        panControl: false,
-        zoomControl: true,
-        zoomControlOptions: {
-          position: google.maps.ControlPosition.LEFT_CENTER
-        }
-      };
+      var map;
 
       function initialize() {
         var mapDiv = document.getElementById('map-canvas');
-        map = new google.maps.Map(mapDiv, mapOptions);
+        map = new MapService(window.google, mapDiv);
 
         var searchControlDiv = document.createElement('div');
         searchControlDiv.id = 'top';
         searchControlDiv.className = 'top';
 
         new SearchControl(searchControlDiv, map);
-        map.controls[google.maps.ControlPosition.TOP_LEFT].push(searchControlDiv);
+        map.addView(searchControlDiv, 'TOP_LEFT');
 
         var homeControlDiv = document.createElement('div');
         homeControlDiv.id = 'bottom_panel';
         homeControlDiv.className = 'bottom_panel';
 
         new HomeControl(homeControlDiv, map);
-        map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(homeControlDiv);
+        map.addView(homeControlDiv, 'BOTTOM_CENTER');
       }
 
       google.maps.event.addDomListener(window, 'load', initialize);
@@ -90,16 +74,8 @@
 
       function clicked(selected) {
 
-        map.setCenter(sanFran);
-        map.setZoom(11);
-        markers.forEach(function(m) {
-          m.setMap(null);
-        });
-        markers = [];
-
-        mapOptions.streetViewControl = false;
-        mapOptions.zoomControl = true;
-        map.setOptions(mapOptions);
+        map.clearMarkers();
+        map.setOptions({ streetViewControl: false, zoomControl: true });
 
         document.getElementById('films_results').innerHTML = '';
         var regEx = /<strong>(.+)<\/strong><span>(.+),\s([0-9]+)<\/span><br>/g;
@@ -119,7 +95,10 @@
         xhr.onload = function() {
           var response = this.response;
           for (var i = 0; i < response.locations.length; i++) {
-            plotOnMap(response, response.locations[i], response.locations.length);
+            map.plotLocation(
+              response.locations[i].geo.lat, 
+              response.locations[i].geo.lng, 
+              zoom(response, response.locations[i]));
           };
         }
         xhr.open("GET", "/movies/locations?title=" + encodeURIComponent(title) + '&director=' + encodeURIComponent(director));
@@ -130,9 +109,9 @@
       function autoCompleteEvent(control) {
         document.getElementById('films_results').innerHTML = '';
           
-        mapOptions.streetViewControl = false;
-        mapOptions.zoomControl = false;
-        map.setOptions(mapOptions);
+        // mapOptions.streetViewControl = false;
+        // mapOptions.zoomControl = false;
+        map.setOptions({ streetViewControl: false, zoomControl: false });
 
         lastKeyStroke = new Date();
 
@@ -219,39 +198,9 @@
         xhr.send();
       }
 
-      function plotOnMap(detail, location) {
-        var pos = new google.maps.LatLng(location.geo.lat, location.geo.lng);
-        var marker = new google.maps.Marker({
-          position: pos,
-          map: map,
-          animation: google.maps.Animation.DROP,
-          title: location.formatted_address
-        });
-
-        if (!infoShown) {
-          var infowindow = new google.maps.InfoWindow({
-            content: '<strong>Click on a marker to see more info about a location!</strong>',
-            maxWidth: 100
-          });
-          infowindow.open(map, marker);
-          setTimeout(function() {
-            infowindow.close();
-          }, 3000);
-          infoShown = true;
-        };
-
-        google.maps.event.addListener(marker, 'click', zoom(detail, location));
-
-        markers.push(marker);
-      }
-
       function zoom(detail, location) {
         return function() {
-          var pos = new google.maps.LatLng(location.geo.lat, location.geo.lng);
-          map.setCenter(pos);
-          map.setZoom(14);
-
-          console.log(location);
+          map.zoomView(location.geo.lat, location.geo.lng);
 
           var locationDiv = document.getElementById('location_detail');
 
@@ -272,15 +221,10 @@
           sateliteViewButton.addEventListener('click', function() {
 
             if (this.value === 'Satelite View') {
-              map.setCenter(pos);
-              map.setZoom(20);
-              map.setMapTypeId(google.maps.MapTypeId.SATELLITE);
-              map.setTilt(45);
-              map.setHeading(90);
+              map.sateliteView(location.geo.lat, location.geo.lng);
               this.value = 'Back to Roadmap'
             } else {
-              map.setZoom(14);
-              map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
+              map.roadmapView(location.geo.lat, location.geo.lng);
               this.value = 'Satelite View'
             }
             
@@ -293,9 +237,7 @@
           streetViewButton.value = 'Street View';
 
           streetViewButton.addEventListener('click', function() {
-            var panorama = map.getStreetView();
-            panorama.setPosition({lat: location.geo.lat, lng: location.geo.lng});
-            panorama.setVisible(true);
+            map.streetView(location.geo.lat, location.geo.lng);
           });
 
           locationDiv.appendChild(streetViewButton);
@@ -305,9 +247,7 @@
           backToFilm.value = 'Back to Film';
 
           backToFilm.addEventListener('click', function() {
-              map.setZoom(11);
-              map.setCenter(sanFran);
-              map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
+              map.reset();
               var location_detail = document.getElementById('location_detail');
               if (location_detail) {
                 location_detail.style.display = 'none';
