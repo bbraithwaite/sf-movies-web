@@ -1,10 +1,4 @@
-function showMovieDetail(item) {
-  displayLoadingPanel(item.title);
-  getMoveDetail(item.title, item.director);
-  plotLocations(item);
-} 
-
-function plotLocations(item) {
+function plotLocations(item, map) {
   var xhr = new XMLHttpRequest();
   xhr.onload = function() {
     var response = this.response;
@@ -12,7 +6,7 @@ function plotLocations(item) {
       map.plotLocation(
         response.locations[i].geo.lat, 
         response.locations[i].geo.lng, 
-        showLocation(response, response.locations[i]));
+        showLocation(response, response.locations[i], map));
     };
   }
   xhr.open("GET", "/movies/locations?title=" + encodeURIComponent(item.title) + '&director=' + encodeURIComponent(item.director));
@@ -61,3 +55,9 @@ function getMoveDetail(title, director) {
   xhr.responseType = "json";
   xhr.send();
 }
+
+function showMovieDetail(item, map) {
+  displayLoadingPanel(item.title);
+  getMoveDetail(item.title, item.director);
+  plotLocations(item, map);
+} 

@@ -4,7 +4,7 @@ function SearchControl(controlDiv, map) {
     map.setOptions({ streetViewControl: false, zoomControl: true });
     document.getElementById('films_results').innerHTML = '';
     document.getElementById('q').value = item.title;
-    showMovieDetail(item);
+    showMovieDetail(item, map);
   };
 
   var searchInput = document.createElement('input');

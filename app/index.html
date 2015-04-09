@@ -10,9 +10,9 @@
     <script type="text/javascript" src="map-service.js"></script>
     <script type="text/javascript" src="templates.js"></script>
     <script type="text/javascript" src="home-control.js"></script>
-    <script type="text/javascript" src="search-control.js"></script>
     <script type="text/javascript" src="location-control.js"></script>
     <script type="text/javascript" src="movie-control.js"></script>
+    <script type="text/javascript" src="search-control.js"></script>
   </head>
   <body>
     <div id="map-canvas"></div>
@@ -24,7 +24,7 @@
 
       function initialize() {
         var mapDiv = document.getElementById('map-canvas');
-        map = new MapService(window.google, mapDiv);
+        var map = new MapService(window.google, mapDiv);
 
         var searchControlDiv = document.createElement('div');
         searchControlDiv.id = 'top';
