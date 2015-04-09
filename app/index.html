@@ -13,34 +13,11 @@
     <script type="text/javascript" src="location-control.js"></script>
     <script type="text/javascript" src="movie-control.js"></script>
     <script type="text/javascript" src="search-control.js"></script>
+    <script type="text/javascript" src="app.js"></script>
   </head>
   <body>
     <div id="map-canvas"></div>
     <script type="text/javascript">
-      /*
-       * NOTE: this (probably) isn't how you should be doing JavaScript!
-       */
-      var map;
-      
-      function initialize() {
-        var mapDiv = document.getElementById('map-canvas');
-        map = new MapService(window.google, mapDiv);
-
-        var searchControlDiv = document.createElement('div');
-        searchControlDiv.id = 'top';
-        searchControlDiv.className = 'top';
-
-        new SearchControl(searchControlDiv);
-        map.addView(searchControlDiv, 'TOP_LEFT');
-
-        var homeControlDiv = document.createElement('div');
-        homeControlDiv.id = 'bottom_panel';
-        homeControlDiv.className = 'bottom_panel';
-
-        new HomeControl(homeControlDiv);
-        map.addView(homeControlDiv, 'BOTTOM_CENTER');
-      }
-
       google.maps.event.addDomListener(window, 'load', initialize);
     </script>
   </body>
