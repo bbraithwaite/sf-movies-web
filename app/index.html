@@ -8,6 +8,7 @@
     <script type="text/javascript" src="bower_components/boc-autocomplete/build/boc.autocomplete.min.js"></script>
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
     <script type="text/javascript" src="map-service.js"></script>
+    <script type="text/javascript" src="templates.js"></script>
   </head>
   <body>
     <div id="map-canvas"></div>
@@ -107,14 +108,14 @@
             var controlText = document.createElement('div');
             controlText.id = 'film_detail';
             controlText.className = 'film_detail';
-            controlText.innerHTML = '<h2>' + response + '</h2><br><em>Loading locations and content...</em>';
+            controlText.innerHTML = templates.loading(response);
 
             document.getElementById('bottom_panel').appendChild(controlText);
 
           } else {
 
             var controlText = document.getElementById('film_detail');
-            controlText.innerHTML = '<h2>' + response + '</h2><em>Loading locations and content...</em>';
+            controlText.innerHTML = templates.loading(response);;
             controlText.style.display = '';
 
           }
@@ -126,15 +127,7 @@
           xhr.onload = function() {
             var detail = this.response;
             
-            document.getElementById('film_detail').innerHTML = '<img src="' + detail.poster + '" alt="poster" align="right" width="80" height="119" style="padding-left:5px;" />'+
-                   '<div id="plot" style="overflow: scroll; height:135px;margin-top:5px;">'+
-                   '<h2>' + detail.title + '</h2>'+
-                  '' + detail.releaseYear + '</em>, Director: '+
-                  '<em>' + detail.director + '</em><br><br>'+
-                  'Staring: ' + detail.actors + '<br><br>'+
-                  'Rating: ' + detail.rating + '<br><br>'+
-                  'Genre: ' + detail.genre + '<br><br>'+
-                  '<br>Plot: ' + detail.plot + '<br><br></div>';
+            document.getElementById('film_detail').innerHTML = templates.movie(detail);
           }
           xhr.open("GET", "/movies/content?title=" + encodeURIComponent(title) + '&director=' + encodeURIComponent(director));
           xhr.responseType = "json";
@@ -155,7 +148,7 @@
             locationDiv.id = 'location_detail';
             locationDiv.className = 'location_detail';
             locationDiv.style.display = '';
-            locationDiv.innerHTML = '<h2>' + location.location  + '</h2><img src="https://maps.googleapis.com/maps/api/streetview?size=120x120&location=' + location.geo.lat + ',' + location.geo.lng + '" align="right">';
+            locationDiv.innerHTML = templates.location(location);
 
             var sateliteViewButton = document.createElement('input');
             sateliteViewButton.type = 'button';
@@ -209,14 +202,12 @@
         }
 
         function HomeControl(controlDiv, map) {
-            // Set CSS for the control border.
             var dashBoard = document.createElement('div');
-            dashBoard.innerHTML = '<h2>SF Movies</h2><div>See film locations for all movies filmed in San Fransisco. <strong>Click on a marker to see more information about a location.</strong>.</div><p>This is a sample project from <a href="http://www.bradoncode.com">Bradley Braithwaite</a>.</p>';
+            dashBoard.innerHTML = templates.home();
             dashBoard.id = 'dashboard';
             dashBoard.className = 'dashboard';
-
             controlDiv.appendChild(dashBoard);
         }
       </script>
     </body>
-</html
+</html>
