@@ -1,12 +1,12 @@
 'use strict';
 
-function SearchControl(controlDiv) {
+window.SearchControl = function(controlDiv) {
   var movieClicked = function(item) {
-    map.clearMarkers();
-    map.setOptions({ streetViewControl: false, zoomControl: true });
+    window.map.clearMarkers();
+    window.map.setOptions({ streetViewControl: false, zoomControl: true });
     document.getElementById('films_results').innerHTML = '';
     document.getElementById('q').value = item.title;
-    showMovieDetail(item);
+    window.showMovieDetail(item);
   };
 
   var searchInput = document.createElement('input');
@@ -29,4 +29,4 @@ function SearchControl(controlDiv) {
   var resultsUI = document.createElement('div');
   resultsUI.id = 'films_results';
   controlDiv.appendChild(resultsUI);
-}
+};

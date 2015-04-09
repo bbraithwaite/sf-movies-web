@@ -1,14 +1,14 @@
 'use strict';
 
-function plotLocations(item) {
+var plotLocations = function(item) {
   var xhr = new XMLHttpRequest();
   xhr.onload = function() {
     var response = this.response;
     for (var i = 0; i < response.locations.length; i++) {
-      map.plotLocation(
+      window.map.plotLocation(
         response.locations[i].geo.lat, 
         response.locations[i].geo.lng, 
-        showLocation(response, response.locations[i]));
+        window.showLocation(response, response.locations[i]));
     }
   };
   xhr.open('GET', '/movies/locations?title=' + 
@@ -17,9 +17,9 @@ function plotLocations(item) {
     encodeURIComponent(item.director));
   xhr.responseType = 'json';
   xhr.send();
-}
+};
 
-function displayLoadingPanel(response) {
+var displayLoadingPanel = function(response) {
   var locationDiv = document.getElementById('location_detail');
   if (locationDiv) {
     locationDiv.style.display = 'none';
@@ -37,25 +37,25 @@ function displayLoadingPanel(response) {
     controlText = document.createElement('div');
     controlText.id = 'film_detail';
     controlText.className = 'film_detail';
-    controlText.innerHTML = templates.loading(response);
+    controlText.innerHTML = window.templates.loading(response);
 
     document.getElementById('bottom_panel').appendChild(controlText);
 
   } else {
 
     controlText = document.getElementById('film_detail');
-    controlText.innerHTML = templates.loading(response);
+    controlText.innerHTML = window.templates.loading(response);
     controlText.style.display = '';
 
   }
-}
+};
 
-function getMoveDetail(title, director) {
+var getMoveDetail = function(title, director) {
   var xhr = new XMLHttpRequest();
   xhr.onload = function() {
     var detail = this.response;
-    
-    document.getElementById('film_detail').innerHTML = templates.movie(detail);
+    var template = window.templates.movie(detail);
+    document.getElementById('film_detail').innerHTML = template;
   };
   xhr.open('GET', '/movies/content?title=' + 
     encodeURIComponent(title) + 
@@ -63,10 +63,10 @@ function getMoveDetail(title, director) {
     encodeURIComponent(director));
   xhr.responseType = 'json';
   xhr.send();
-}
+};
 
-function showMovieDetail(item, map) {
+window.showMovieDetail = function(item, map) {
   displayLoadingPanel(item.title);
   getMoveDetail(item.title, item.director);
   plotLocations(item, map);
-} 
+};
