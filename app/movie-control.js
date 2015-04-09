@@ -1,4 +1,4 @@
-function plotLocations(item, map) {
+function plotLocations(item) {
   var xhr = new XMLHttpRequest();
   xhr.onload = function() {
     var response = this.response;
@@ -6,7 +6,7 @@ function plotLocations(item, map) {
       map.plotLocation(
         response.locations[i].geo.lat, 
         response.locations[i].geo.lng, 
-        showLocation(response, response.locations[i], map));
+        showLocation(response, response.locations[i]));
     };
   }
   xhr.open("GET", "/movies/locations?title=" + encodeURIComponent(item.title) + '&director=' + encodeURIComponent(item.director));

@@ -1,10 +1,10 @@
-function SearchControl(controlDiv, map) {
+function SearchControl(controlDiv) {
   var movieClicked = function(item) {
     map.clearMarkers();
     map.setOptions({ streetViewControl: false, zoomControl: true });
     document.getElementById('films_results').innerHTML = '';
     document.getElementById('q').value = item.title;
-    showMovieDetail(item, map);
+    showMovieDetail(item);
   };
 
   var searchInput = document.createElement('input');

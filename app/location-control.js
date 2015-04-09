@@ -1,4 +1,4 @@
-function showLocation(detail, location, map) {
+function showLocation(detail, location) {
   return function() {
     map.zoomView(location.geo.lat, location.geo.lng);
 
