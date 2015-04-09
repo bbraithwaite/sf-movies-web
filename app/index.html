@@ -9,217 +9,39 @@
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
     <script type="text/javascript" src="map-service.js"></script>
     <script type="text/javascript" src="templates.js"></script>
+    <script type="text/javascript" src="home-control.js"></script>
+    <script type="text/javascript" src="search-control.js"></script>
+    <script type="text/javascript" src="location-control.js"></script>
+    <script type="text/javascript" src="movie-control.js"></script>
   </head>
   <body>
     <div id="map-canvas"></div>
     <script type="text/javascript">
-        /*
-         * NOTE: this (probably) isn't how you should be doing JavaScript!
-         */
-        var map;
+      /*
+       * NOTE: this (probably) isn't how you should be doing JavaScript!
+       */
+      var map;
 
-        function initialize() {
-          var mapDiv = document.getElementById('map-canvas');
-          map = new MapService(window.google, mapDiv);
+      function initialize() {
+        var mapDiv = document.getElementById('map-canvas');
+        map = new MapService(window.google, mapDiv);
 
-          var searchControlDiv = document.createElement('div');
-          searchControlDiv.id = 'top';
-          searchControlDiv.className = 'top';
+        var searchControlDiv = document.createElement('div');
+        searchControlDiv.id = 'top';
+        searchControlDiv.className = 'top';
 
-          new SearchControl(searchControlDiv, map);
-          map.addView(searchControlDiv, 'TOP_LEFT');
+        new SearchControl(searchControlDiv, map);
+        map.addView(searchControlDiv, 'TOP_LEFT');
 
-          var homeControlDiv = document.createElement('div');
-          homeControlDiv.id = 'bottom_panel';
-          homeControlDiv.className = 'bottom_panel';
+        var homeControlDiv = document.createElement('div');
+        homeControlDiv.id = 'bottom_panel';
+        homeControlDiv.className = 'bottom_panel';
 
-          new HomeControl(homeControlDiv, map);
-          map.addView(homeControlDiv, 'BOTTOM_CENTER');
-        }
+        new HomeControl(homeControlDiv, map);
+        map.addView(homeControlDiv, 'BOTTOM_CENTER');
+      }
 
-        google.maps.event.addDomListener(window, 'load', initialize);
-
-        /*
-         * Search Panel
-         */
-        function SearchControl(controlDiv, map) {
-          var movieClicked = function(item) {
-            map.clearMarkers();
-            map.setOptions({ streetViewControl: false, zoomControl: true });
-            document.getElementById('films_results').innerHTML = '';
-            document.getElementById('q').value = item.title;
-            showMovieDetail(item);
-          };
-
-          var searchInput = document.createElement('input');
-          searchInput.type = 'search';
-          searchInput.name = 'q';
-          searchInput.id = 'q';
-          searchInput.placeholder = 'Enter film title...';
-          controlDiv.appendChild(searchInput);
-
-          new window.Autocomplete(searchInput, { 
-            url: '/movies/search', 
-            param: 'q',
-            label: 'title',
-            value: 'releaseYear',
-            select: function(item) { 
-              movieClicked(item);
-            }
-          });
-          
-          var resultsUI = document.createElement('div');
-          resultsUI.id = 'films_results';
-          controlDiv.appendChild(resultsUI);
-        }
-
-        /*
-         * Movie Detail
-         */
-        function showLocation(detail, location) {
-          return function() {
-            map.zoomView(location.geo.lat, location.geo.lng);
-
-            var locationDiv = document.getElementById('location_detail');
-
-            if (!locationDiv) {
-              locationDiv = document.createElement('div');
-               document.getElementById('bottom_panel').appendChild(locationDiv);
-            }
-
-            locationDiv.id = 'location_detail';
-            locationDiv.className = 'location_detail';
-            locationDiv.style.display = '';
-            locationDiv.innerHTML = templates.location(location);
-
-            var sateliteViewButton = document.createElement('input');
-            sateliteViewButton.type = 'button';
-            sateliteViewButton.value = 'Satelite View';
-
-            sateliteViewButton.addEventListener('click', function() {
-
-              if (this.value === 'Satelite View') {
-                map.sateliteView(location.geo.lat, location.geo.lng);
-                this.value = 'Back to Roadmap'
-              } else {
-                map.roadmapView(location.geo.lat, location.geo.lng);
-                this.value = 'Satelite View'
-              }
-              
-            });
-
-            locationDiv.appendChild(sateliteViewButton);
-
-            var streetViewButton = document.createElement('input');
-            streetViewButton.type = 'button';
-            streetViewButton.value = 'Street View';
-
-            streetViewButton.addEventListener('click', function() {
-              map.streetView(location.geo.lat, location.geo.lng);
-            });
-
-            locationDiv.appendChild(streetViewButton);
-
-            var backToFilm = document.createElement('input');
-            backToFilm.type = 'button';
-            backToFilm.value = 'Back to Film';
-
-            backToFilm.addEventListener('click', function() {
-                map.reset();
-                var location_detail = document.getElementById('location_detail');
-                if (location_detail) {
-                  location_detail.style.display = 'none';
-                }
-
-                var film_detail = document.getElementById('film_detail');
-                if (film_detail) {
-                  film_detail.style.display = '';
-                }
-            });
-
-            locationDiv.appendChild(backToFilm);
-
-            document.getElementById('film_detail').style.display = 'none';
-          }
-        }
-
-        /*
-         * Movie Detail
-         */
-        function showMovieDetail(item) {
-          displayLoadingPanel(item.title);
-          getMoveDetail(item.title, item.director);
-          plotLocations(item);
-        } 
-
-        function plotLocations(item) {
-          var xhr = new XMLHttpRequest();
-          xhr.onload = function() {
-            var response = this.response;
-            for (var i = 0; i < response.locations.length; i++) {
-              map.plotLocation(
-                response.locations[i].geo.lat, 
-                response.locations[i].geo.lng, 
-                showLocation(response, response.locations[i]));
-            };
-          }
-          xhr.open("GET", "/movies/locations?title=" + encodeURIComponent(item.title) + '&director=' + encodeURIComponent(item.director));
-          xhr.responseType = "json";
-          xhr.send();
-        }
-
-        function displayLoadingPanel(response) {
-          var locationDiv = document.getElementById('location_detail');
-          if (locationDiv) {
-            locationDiv.style.display = 'none';
-          }
-
-          var dashboard = document.getElementById('dashboard');
-          if (dashboard) {
-            dashboard.style.display = 'none';
-          }
-
-          if (!document.getElementById('film_detail')) {
-
-            // Set CSS for the control interior.
-            var controlText = document.createElement('div');
-            controlText.id = 'film_detail';
-            controlText.className = 'film_detail';
-            controlText.innerHTML = templates.loading(response);
-
-            document.getElementById('bottom_panel').appendChild(controlText);
-
-          } else {
-
-            var controlText = document.getElementById('film_detail');
-            controlText.innerHTML = templates.loading(response);;
-            controlText.style.display = '';
-
-          }
-        }
-
-        function getMoveDetail(title, director) {
-          var xhr = new XMLHttpRequest();
-          xhr.onload = function() {
-            var detail = this.response;
-            
-            document.getElementById('film_detail').innerHTML = templates.movie(detail);
-          }
-          xhr.open("GET", "/movies/content?title=" + encodeURIComponent(title) + '&director=' + encodeURIComponent(director));
-          xhr.responseType = "json";
-          xhr.send();
-        }
-
-        /*
-         * Homepage Panel
-         */
-        function HomeControl(controlDiv, map) {
-            var dashBoard = document.createElement('div');
-            dashBoard.innerHTML = templates.home();
-            dashBoard.id = 'dashboard';
-            dashBoard.className = 'dashboard';
-            controlDiv.appendChild(dashBoard);
-        }
-      </script>
-    </body>
+      google.maps.event.addDomListener(window, 'load', initialize);
+    </script>
+  </body>
 </html>
