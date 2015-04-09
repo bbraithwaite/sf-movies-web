@@ -2,6 +2,14 @@
 
 window.templates = window.templates || {};
 
+window.templates.topPanel = function topPanel() {
+  return '<div id="top_panel" class="top_panel"></div>';
+};
+
+window.templates.bottomPanel = function topPanel() {
+  return '<div id="bottom_panel" class="bottom_panel"></div>';
+};
+
 window.templates.home = function homeTemplate() {
   var buf = [];
   buf.push('<div>');

@@ -1,6 +1,7 @@
 'use strict';
 
 var AppView = Backbone.View.extend({
+
   el: '#map_canvas',
 
   initialize: function(google) {
@@ -11,8 +12,8 @@ var AppView = Backbone.View.extend({
   },
 
   render: function() {
-    this.map.addView($('<div id="bottom_panel" class="bottom_panel"></div>')[0], 'BOTTOM_CENTER');
-    this.map.addView($('<div id="top_panel" class="top_panel"></div>')[0], 'TOP_LEFT');
+    this.map.addView($(window.templates.topPanel())[0], 'TOP_LEFT');
+    this.map.addView($(window.templates.bottomPanel())[0], 'BOTTOM_CENTER');
   }
 
 });
