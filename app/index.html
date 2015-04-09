@@ -3,280 +3,220 @@
   <head>
     <title>SF Movies | Find out where the best movies happened in San Fransisco</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <link rel="stylesheet" type="text/css" href="/bower_components/boc-autocomplete/build/boc.autocomplete.min.css">
     <link rel="stylesheet" type="text/css" href="style.css">
+    <script type="text/javascript" src="bower_components/boc-autocomplete/build/boc.autocomplete.min.js"></script>
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
     <script type="text/javascript" src="map-service.js"></script>
-    <script type="text/javascript">
-      /*
-       * NOTE: this (probably) isn't how you should be doing JavaScript!
-       */
-      var watermark = 'Enter film title...';
-      var lastKeyStroke;
-      var infoShown = false;
-      var map;
-
-      function initialize() {
-        var mapDiv = document.getElementById('map-canvas');
-        map = new MapService(window.google, mapDiv);
-
-        var searchControlDiv = document.createElement('div');
-        searchControlDiv.id = 'top';
-        searchControlDiv.className = 'top';
-
-        new SearchControl(searchControlDiv, map);
-        map.addView(searchControlDiv, 'TOP_LEFT');
-
-        var homeControlDiv = document.createElement('div');
-        homeControlDiv.id = 'bottom_panel';
-        homeControlDiv.className = 'bottom_panel';
-
-        new HomeControl(homeControlDiv, map);
-        map.addView(homeControlDiv, 'BOTTOM_CENTER');
-      }
-
-      google.maps.event.addDomListener(window, 'load', initialize);
-
-      function SearchControl(controlDiv, map) {
-
-        var controlUI = document.createElement('input');
-        controlUI.type = 'text';
-        controlUI.name = 'q';
-        controlUI.id = 'q';
-        controlUI.value = watermark;
-        controlUI.className = 'watermark';
-        controlUI.autocomplete = 'off';
-
-        controlUI.addEventListener('focus', function() {
-          if (this.value === watermark) {
-            this.value = '';
-          } else {
-            autoCompleteEvent(this);
-          }
-          document.getElementById('films_results').innerHTML = '';
-        });
-
-        controlUI.addEventListener('blur', function() {
-          if (this.value === '') {
-            this.value = watermark;
-          };
-        });
-
-        controlUI.addEventListener('keyup', function() {
-          autoCompleteEvent(this);
-        });
-        
-        controlDiv.appendChild(controlUI);
-
-        var resultsUI = document.createElement('div');
-        resultsUI.id = 'films_results';
-        controlDiv.appendChild(resultsUI);
-      }
-
-      function clicked(selected) {
-
-        map.clearMarkers();
-        map.setOptions({ streetViewControl: false, zoomControl: true });
-
-        document.getElementById('films_results').innerHTML = '';
-        var regEx = /<strong>(.+)<\/strong><span>(.+),\s([0-9]+)<\/span><br>/g;
-
-        var match = regEx.exec(selected);
-        var title = match[1];
-        var director = match[2];
-        var year = match[3];
-
-        detailPanel(title);
-
-        document.getElementById('q').value = title;
-
-        setMoveDetail(title, director);
-
-        var xhr = new XMLHttpRequest();
-        xhr.onload = function() {
-          var response = this.response;
-          for (var i = 0; i < response.locations.length; i++) {
-            map.plotLocation(
-              response.locations[i].geo.lat, 
-              response.locations[i].geo.lng, 
-              zoom(response, response.locations[i]));
-          };
-        }
-        xhr.open("GET", "/movies/locations?title=" + encodeURIComponent(title) + '&director=' + encodeURIComponent(director));
-        xhr.responseType = "json";
-        xhr.send();
-      }
-
-      function autoCompleteEvent(control) {
-        document.getElementById('films_results').innerHTML = '';
-          
-        // mapOptions.streetViewControl = false;
-        // mapOptions.zoomControl = false;
-        map.setOptions({ streetViewControl: false, zoomControl: false });
-
-        lastKeyStroke = new Date();
-
-        setTimeout(function() {
-
-          var a = new Date() - lastKeyStroke;
-          if (a < 180) {
-            return;
-          }
-          
-          if (control.value && control.value.length > 1) {
-            var query = control.value; // TODO: think about parsing
-            var xhr = new XMLHttpRequest();
-            xhr.onload = function() {
-              document.getElementById('films_results').innerHTML = '';
-              var ul = document.createElement('ul');
-              //var r = this.response.results[0];
-              this.response.forEach(function(r) {
-                var li = document.createElement('li');
-                var text = '<strong>' + r.title + '</strong><span>' + r.director + ', ' + r.releaseYear + '</span><br><span class="locations">' + r.locations.join(', ') + '</span>';
-                li.innerHTML = text;
-                li.addEventListener('click', function() {
-                  clicked(this.innerHTML);
-                });
-                ul.appendChild(li);
-              });
-              document.getElementById('films_results').appendChild(ul);
-            }
-            xhr.open("GET", "/movies/search?q=" + control.value);
-            xhr.responseType = "json";
-            xhr.send();
-          }
-
-        }, 200);
-      }
-
-      function detailPanel(response) {
-        var locationDiv = document.getElementById('location_detail');
-        if (locationDiv) {
-          locationDiv.style.display = 'none';
-        }
-
-        var dashboard = document.getElementById('dashboard');
-        if (dashboard) {
-          dashboard.style.display = 'none';
-        }
-
-        if (!document.getElementById('film_detail')) {
-
-          // Set CSS for the control interior.
-          var controlText = document.createElement('div');
-          controlText.id = 'film_detail';
-          controlText.className = 'film_detail';
-          controlText.innerHTML = '<h2>' + response + '</h2><br><em>Loading locations and content...</em>';
-
-          document.getElementById('bottom_panel').appendChild(controlText);
-
-
-        } else {
-
-          var controlText = document.getElementById('film_detail');
-          controlText.innerHTML = '<h2>' + response + '</h2><em>Loading locations and content...</em>';
-          controlText.style.display = '';
-        }
-      }
-
-      function setMoveDetail(title, director) {
-
-        var xhr = new XMLHttpRequest();
-        xhr.onload = function() {
-          var detail = this.response;
-          document.getElementById('film_detail').innerHTML = '<img src="' + detail.poster + '" alt="poster" align="right" width="80" height="119" style="padding-left:5px;" />'+
-                 '<div id="plot" style="overflow: scroll; height:135px;margin-top:5px;">'+
-                 '<h2>' + detail.title + '</h2>'+
-                '' + detail.release_year + '</em>, Director: '+
-                '<em>' + detail.director + '</em><br><br>'+
-                'Staring: ' + detail.actors + '<br><br>'+
-                'Rating: ' + detail.rating + '<br><br>'+
-                'Genre: ' + detail.genre + '<br><br>'+
-                '<br>Plot: ' + detail.plot + '<br><br></div>';
-        }
-        xhr.open("GET", "/movies/content?title=" + encodeURIComponent(title) + '&director=' + encodeURIComponent(director));
-        xhr.responseType = "json";
-        xhr.send();
-      }
-
-      function zoom(detail, location) {
-        return function() {
-          map.zoomView(location.geo.lat, location.geo.lng);
-
-          var locationDiv = document.getElementById('location_detail');
-
-          if (!locationDiv) {
-            locationDiv = document.createElement('div');
-             document.getElementById('bottom_panel').appendChild(locationDiv);
-          }
-
-          locationDiv.id = 'location_detail';
-          locationDiv.className = 'location_detail';
-          locationDiv.style.display = '';
-          locationDiv.innerHTML = '<h2>' + location.location  + '</h2><img src="https://maps.googleapis.com/maps/api/streetview?size=120x120&location=' + location.geo.lat + ',' + location.geo.lng + '" align="right">';
-
-          var sateliteViewButton = document.createElement('input');
-          sateliteViewButton.type = 'button';
-          sateliteViewButton.value = 'Satelite View';
-
-          sateliteViewButton.addEventListener('click', function() {
-
-            if (this.value === 'Satelite View') {
-              map.sateliteView(location.geo.lat, location.geo.lng);
-              this.value = 'Back to Roadmap'
-            } else {
-              map.roadmapView(location.geo.lat, location.geo.lng);
-              this.value = 'Satelite View'
-            }
-            
-          });
-
-          locationDiv.appendChild(sateliteViewButton);
-
-          var streetViewButton = document.createElement('input');
-          streetViewButton.type = 'button';
-          streetViewButton.value = 'Street View';
-
-          streetViewButton.addEventListener('click', function() {
-            map.streetView(location.geo.lat, location.geo.lng);
-          });
-
-          locationDiv.appendChild(streetViewButton);
-
-          var backToFilm = document.createElement('input');
-          backToFilm.type = 'button';
-          backToFilm.value = 'Back to Film';
-
-          backToFilm.addEventListener('click', function() {
-              map.reset();
-              var location_detail = document.getElementById('location_detail');
-              if (location_detail) {
-                location_detail.style.display = 'none';
-              }
-
-              var film_detail = document.getElementById('film_detail');
-              if (film_detail) {
-                film_detail.style.display = '';
-              }
-          });
-
-          locationDiv.appendChild(backToFilm);
-
-          document.getElementById('film_detail').style.display = 'none';
-        }
-      }
-
-      function HomeControl(controlDiv, map) {
-          // Set CSS for the control border.
-          var dashBoard = document.createElement('div');
-          dashBoard.innerHTML = '<h2>SF Movies</h2><div>See film locations for all movies filmed in San Fransisco. <strong>Click on a marker to see more information about a location.</strong>.</div><p>This is a sample project from <a href="http://www.bradoncode.com">Bradley Braithwaite</a>.</p>';
-          dashBoard.id = 'dashboard';
-          dashBoard.className = 'dashboard';
-
-          controlDiv.appendChild(dashBoard);
-      }
-    </script>
   </head>
   <body>
     <div id="map-canvas"></div>
-  </body>
+    <script type="text/javascript">
+        /*
+         * NOTE: this (probably) isn't how you should be doing JavaScript!
+         */
+        var map;
+
+        function initialize() {
+          var mapDiv = document.getElementById('map-canvas');
+          map = new MapService(window.google, mapDiv);
+
+          var searchControlDiv = document.createElement('div');
+          searchControlDiv.id = 'top';
+          searchControlDiv.className = 'top';
+
+          new SearchControl(searchControlDiv, map);
+          map.addView(searchControlDiv, 'TOP_LEFT');
+
+          var homeControlDiv = document.createElement('div');
+          homeControlDiv.id = 'bottom_panel';
+          homeControlDiv.className = 'bottom_panel';
+
+          new HomeControl(homeControlDiv, map);
+          map.addView(homeControlDiv, 'BOTTOM_CENTER');
+        }
+
+        google.maps.event.addDomListener(window, 'load', initialize);
+
+        function SearchControl(controlDiv, map) {
+
+          var searchInput = document.createElement('input');
+          searchInput.type = 'search';
+          searchInput.name = 'q';
+          searchInput.id = 'q';
+          searchInput.placeholder = 'Enter film title...';
+          controlDiv.appendChild(searchInput);
+
+          new window.Autocomplete(searchInput, { 
+            url: '/movies/search', 
+            param: 'q',
+            label: 'title',
+            value: 'releaseYear',
+            select: function(item) { 
+              clicked(item);
+            }
+          });
+          
+          var resultsUI = document.createElement('div');
+          resultsUI.id = 'films_results';
+          controlDiv.appendChild(resultsUI);
+        }
+
+        function clicked(item) {
+
+          map.clearMarkers();
+          map.setOptions({ streetViewControl: false, zoomControl: true });
+
+          document.getElementById('films_results').innerHTML = '';
+    
+          detailPanel(item.title);
+
+          document.getElementById('q').value = item.title;
+
+          setMoveDetail(item.title, item.director);
+
+          var xhr = new XMLHttpRequest();
+          xhr.onload = function() {
+            var response = this.response;
+            for (var i = 0; i < response.locations.length; i++) {
+              map.plotLocation(
+                response.locations[i].geo.lat, 
+                response.locations[i].geo.lng, 
+                zoom(response, response.locations[i]));
+            };
+          }
+          xhr.open("GET", "/movies/locations?title=" + encodeURIComponent(item.title) + '&director=' + encodeURIComponent(item.director));
+          xhr.responseType = "json";
+          xhr.send();
+        }
+
+        function detailPanel(response) {
+          var locationDiv = document.getElementById('location_detail');
+          if (locationDiv) {
+            locationDiv.style.display = 'none';
+          }
+
+          var dashboard = document.getElementById('dashboard');
+          if (dashboard) {
+            dashboard.style.display = 'none';
+          }
+
+          if (!document.getElementById('film_detail')) {
+
+            // Set CSS for the control interior.
+            var controlText = document.createElement('div');
+            controlText.id = 'film_detail';
+            controlText.className = 'film_detail';
+            controlText.innerHTML = '<h2>' + response + '</h2><br><em>Loading locations and content...</em>';
+
+            document.getElementById('bottom_panel').appendChild(controlText);
+
+          } else {
+
+            var controlText = document.getElementById('film_detail');
+            controlText.innerHTML = '<h2>' + response + '</h2><em>Loading locations and content...</em>';
+            controlText.style.display = '';
+
+          }
+        }
+
+        function setMoveDetail(title, director) {
+
+          var xhr = new XMLHttpRequest();
+          xhr.onload = function() {
+            var detail = this.response;
+            
+            document.getElementById('film_detail').innerHTML = '<img src="' + detail.poster + '" alt="poster" align="right" width="80" height="119" style="padding-left:5px;" />'+
+                   '<div id="plot" style="overflow: scroll; height:135px;margin-top:5px;">'+
+                   '<h2>' + detail.title + '</h2>'+
+                  '' + detail.releaseYear + '</em>, Director: '+
+                  '<em>' + detail.director + '</em><br><br>'+
+                  'Staring: ' + detail.actors + '<br><br>'+
+                  'Rating: ' + detail.rating + '<br><br>'+
+                  'Genre: ' + detail.genre + '<br><br>'+
+                  '<br>Plot: ' + detail.plot + '<br><br></div>';
+          }
+          xhr.open("GET", "/movies/content?title=" + encodeURIComponent(title) + '&director=' + encodeURIComponent(director));
+          xhr.responseType = "json";
+          xhr.send();
+        }
+
+        function zoom(detail, location) {
+          return function() {
+            map.zoomView(location.geo.lat, location.geo.lng);
+
+            var locationDiv = document.getElementById('location_detail');
+
+            if (!locationDiv) {
+              locationDiv = document.createElement('div');
+               document.getElementById('bottom_panel').appendChild(locationDiv);
+            }
+
+            locationDiv.id = 'location_detail';
+            locationDiv.className = 'location_detail';
+            locationDiv.style.display = '';
+            locationDiv.innerHTML = '<h2>' + location.location  + '</h2><img src="https://maps.googleapis.com/maps/api/streetview?size=120x120&location=' + location.geo.lat + ',' + location.geo.lng + '" align="right">';
+
+            var sateliteViewButton = document.createElement('input');
+            sateliteViewButton.type = 'button';
+            sateliteViewButton.value = 'Satelite View';
+
+            sateliteViewButton.addEventListener('click', function() {
+
+              if (this.value === 'Satelite View') {
+                map.sateliteView(location.geo.lat, location.geo.lng);
+                this.value = 'Back to Roadmap'
+              } else {
+                map.roadmapView(location.geo.lat, location.geo.lng);
+                this.value = 'Satelite View'
+              }
+              
+            });
+
+            locationDiv.appendChild(sateliteViewButton);
+
+            var streetViewButton = document.createElement('input');
+            streetViewButton.type = 'button';
+            streetViewButton.value = 'Street View';
+
+            streetViewButton.addEventListener('click', function() {
+              map.streetView(location.geo.lat, location.geo.lng);
+            });
+
+            locationDiv.appendChild(streetViewButton);
+
+            var backToFilm = document.createElement('input');
+            backToFilm.type = 'button';
+            backToFilm.value = 'Back to Film';
+
+            backToFilm.addEventListener('click', function() {
+                map.reset();
+                var location_detail = document.getElementById('location_detail');
+                if (location_detail) {
+                  location_detail.style.display = 'none';
+                }
+
+                var film_detail = document.getElementById('film_detail');
+                if (film_detail) {
+                  film_detail.style.display = '';
+                }
+            });
+
+            locationDiv.appendChild(backToFilm);
+
+            document.getElementById('film_detail').style.display = 'none';
+          }
+        }
+
+        function HomeControl(controlDiv, map) {
+            // Set CSS for the control border.
+            var dashBoard = document.createElement('div');
+            dashBoard.innerHTML = '<h2>SF Movies</h2><div>See film locations for all movies filmed in San Fransisco. <strong>Click on a marker to see more information about a location.</strong>.</div><p>This is a sample project from <a href="http://www.bradoncode.com">Bradley Braithwaite</a>.</p>';
+            dashBoard.id = 'dashboard';
+            dashBoard.className = 'dashboard';
+
+            controlDiv.appendChild(dashBoard);
+        }
+      </script>
+    </body>
 </html
