@@ -81,8 +81,6 @@ window.GoogleMap = function(google, mapDiv) {
       panorama.setVisible(true);
     },
     clearMarkers: function() {
-      // map.setCenter(sanFran);
-      // map.setZoom(11);
       markers.forEach(function(m) {
         m.setMap(null);
       });
