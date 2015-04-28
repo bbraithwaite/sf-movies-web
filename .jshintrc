@@ -49,6 +49,10 @@
   // Warn when variables are defined but never used.
   "unused": true,
 
+  // complexity rules
+  "maxdepth": 2,
+  "maxcomplexity": 5,
+
   /*
    * RELAXING OPTIONS
    * =================
