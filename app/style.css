@@ -1,12 +1,23 @@
-html, body, #map-canvas { 
-  height: 100%; 
+html, body { 
   margin: 0; 
-  padding: 0; 
+  padding: 0;
+  height: 100%;
+  font-family: Arial, sans-serif;
 }
 
-.dashboard, .film_detail, .location_detail {
-  padding-left: 10px;
-  padding-right: 10px;
+#map-canvas { 
+  height: 80%; 
+}
+
+.bottom_panel {
+  height: 20%;
+  padding: 10px;
+  margin: 0;
+  font-size: 14px;
+}
+
+.bottom_panel h2 {
+  margin-top: 0;
 }
 
 .top {
@@ -20,22 +31,8 @@ html, body, #map-canvas {
   font-size: 16px;
 }
 
-.bottom_panel {
-  background-color: #fff;
-  border: solid 1px #ccc;
-  width: 100%;
-  height: 150px;
-  z-index: 1;
-}
-
-.movie_detail {
-  overflow: scroll; 
-  height: 135px;
-  margin-top: 5px;
-}
-
-.movie_detail img {
-  padding-left: 5px;
+[ng\:cloak], [ng-cloak], .ng-cloak {
+    display: none;
 }
 
 input[type=button] {
@@ -51,6 +48,16 @@ input[type=button] {
   color: #ffffff;
   padding: 5px;
   text-decoration: none;
+}
+
+.movie_detail {
+  overflow: scroll; 
+  height: 100%;
+  margin-top: 5px;
+}
+
+.movie_detail img {
+  padding-left: 5px;
 }
 
 ::-webkit-scrollbar {
