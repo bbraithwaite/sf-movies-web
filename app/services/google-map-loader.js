@@ -20,6 +20,7 @@ angular.module('sfMovies').service('googleMapLoader', ['$window', '$document', '
     script.type = 'text/javascript';
     script.src = 'https://maps.googleapis.com/maps/api/js?callback=' + 
       tempInitFunctionName;
+      
     return $document[0].body.appendChild(script);
   };
 

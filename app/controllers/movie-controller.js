@@ -1,7 +1,8 @@
 'use strict';
 
-angular.module('sfMovies').controller('movieController', ['$rootScope', '$scope', '$http', 'mapService', 'omdbService', 
-    function($rootScope, $scope, $http, mapService, omdbService) {
+angular.module('sfMovies')
+  .controller('movieController', ['$rootScope', '$scope', 'mapService', 'omdbService', 'locationService',
+    function($rootScope, $scope, mapService, omdbService, locationService) {
   
   $rootScope.$on('movieSelected', function(event, movie) {
 
@@ -15,25 +16,22 @@ angular.module('sfMovies').controller('movieController', ['$rootScope', '$scope'
       .then(function(content) {
         angular.extend($scope.movie, content);
       }, function() {
-        //TODO: decide on error display
+        //TODO: decide on error display strategy
         console.log('error');
       });
-
-    $http.get('/movies/locations?title=' +
-        encodeURIComponent(movie.title) + 
-        '&director=' + 
-        encodeURIComponent(movie.director)).
-      success(function(data) {
+  
+    locationService.getLocations(movie)
+      .then(function(data) {
         data.locations.forEach(function(l) {
           mapService.plotLocation(l.geo.lat, l.geo.lng, function() {
             $rootScope.$emit('locationSelected', l);
           });
         });
-      }).
-      error(function(data) {
-        //TODO: decide on error display
-        console.log(data);
+      }, function() {
+        //TODO: decide on error display strategy
+        console.log('error');
       });
-      
+
   });
+
 }]);

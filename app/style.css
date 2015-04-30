@@ -20,6 +20,10 @@ html, body {
   margin-top: 0;
 }
 
+.bottom_panel img {
+  padding-right: 5px;
+}
+
 .top {
   width: 85%;
   padding: 10px;

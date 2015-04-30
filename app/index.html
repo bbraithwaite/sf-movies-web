@@ -12,7 +12,6 @@
         <boc-autocomplete data-url="/movies/search" data-stext="title" data-svalue="releaseYear" data-sparam="q" placeholder="Enter Film Title..." ng-controller="searchController"></boc-autocomplete>
       </div>
     </google-map>
-    
     <div id="movie-control" ng-controller="movieController" class="bottom_panel">
       <div id="home-control" ng-show="!movie">
         <h2>SF Movies</h2>
@@ -40,7 +39,7 @@
         <input type="button" value="Satelite View" ng-show="!isSateliteView" ng-click="sateliteView()">
         <input type="button" value="Roadmap View" ng-show="isSateliteView" ng-click="roadmapView()">
         <input type="button" value="Street View" ng-click="streetView()">
-        <input type="button" value="Back to Film" ng-click="backToFilm()">
+        <input type="button" value="Back to Film Detail" ng-click="backToFilm()">
       </div>
     </div>
     <script type="text/javascript" src="/bower_components/angular/angular.js"></script>

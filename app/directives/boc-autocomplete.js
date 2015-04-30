@@ -1,7 +1,8 @@
 'use strict';
 
 angular.module('sfMovies').directive('bocAutocomplete', function() {
-  var id = 'q' + Math.round(Math.random() * 1000);
+  // create dynamic id to avoid collisions
+  var id = 'autocomplete' + Math.round(Math.random() * 1000);
   return {
     replace: true,
     restrict: 'E',
