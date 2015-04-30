@@ -20,14 +20,14 @@ angular.module('sfMovies').controller('locationController', ['$rootScope', '$sco
     $scope.showLocation = false;
   };
 
-  $scope.sateliteView = function() {
-    mapService.sateliteView($scope.location.geo.lat, $scope.location.geo.lng);
-    $scope.isSateliteView = true;
-  };
-
   $scope.roadmapView = function() {
     mapService.roadmapView($scope.location.geo.lat, $scope.location.geo.lng);
     $scope.isSateliteView = false;
+  };
+
+  $scope.sateliteView = function() {
+    mapService.sateliteView($scope.location.geo.lat, $scope.location.geo.lng);
+    $scope.isSateliteView = true;
   };
 
   $scope.streetView = function() {
