@@ -14,7 +14,7 @@ angular.module('sfMovies').controller('locationController', ['$rootScope', '$sco
 
   });
 
-  $scope.backToFilm = function() {
+  $scope.backToMovie = function() {
     mapService.reset();
     $scope.$parent.showMovie = true;
     $scope.showLocation = false;
